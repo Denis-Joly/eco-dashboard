@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="A growing, connected view of market risk, breadth, credit, rates and the economic cycle."
+    />
+    <meta name="theme-color" content="#071c1a" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Market Surface" />
+    <meta
+      property="og:description"
+      content="A connected view of volatility, breadth, credit, rates and macro signals."
+    />
+    <meta property="og:url" content="https://denis-joly.github.io/eco-dashboard/" />
+    <meta property="og:image" content="https://denis-joly.github.io/eco-dashboard/public/og.png" />
+    <meta property="og:image:width" content="1731" />
+    <meta property="og:image:height" content="909" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Market Surface" />
+    <meta
+      name="twitter:description"
+      content="A connected view of volatility, breadth, credit, rates and macro signals."
+    />
+    <meta name="twitter:image" content="https://denis-joly.github.io/eco-dashboard/public/og.png" />
+    <title>Market Surface: Economic &amp; Market Regime Dashboard</title>
+    <link rel="stylesheet" href="styles.css?v=20260810c" />
+    <script type="module" src="app.js?v=20260810c"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to dashboard</a>
+
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="Market Surface home">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>Market Surface</span>
+      </a>
+      <div class="update-chip" id="update-chip" role="status">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span id="update-label">Loading latest observations…</span>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">Public stress data · Private market overlay</p>
+          <h1 id="hero-title">Is the market calm, or are the signals <em>telling different stories?</em></h1>
+          <p class="hero-intro">
+            A growing dashboard that connects public financial-stress data with an optional private market-data
+            layer, so the regime can be read as a system rather than as isolated indicators.
+          </p>
+          <a class="text-link" href="#relationships">See how the signals connect <span aria-hidden="true">↓</span></a>
+        </div>
+
+        <article class="regime-card" aria-labelledby="regime-title">
+          <div class="regime-topline">
+            <span class="regime-kicker">Current read</span>
+            <span class="as-of" id="regime-as-of">Awaiting aligned data</span>
+          </div>
+          <div class="regime-visual" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <h2 id="regime-title">Reading the signals…</h2>
+          <p id="regime-copy">The interpretation will appear when the latest required observations are loaded.</p>
+          <div class="signal-list" id="signal-list" aria-label="Evidence behind this interpretation"></div>
+        </article>
+      </section>
+
+      <section class="data-access section-shell" id="private-layer" aria-labelledby="private-layer-title">
+        <div class="data-access-grid">
+          <div class="data-access-copy">
+            <p class="eyebrow">Your private options layer</p>
+            <h2 id="private-layer-title">Add VIX-family analysis without publishing the data</h2>
+            <p>
+              The hosted dashboard uses public OFR observations. If you have obtained VIX, VIXEQ, DSPX or COR1M
+              CSV files for your own permitted use, you can open them locally to add their histories, percentiles
+              and relationships to this session.
+            </p>
+            <div class="official-link-row" aria-label="Official Cboe product pages">
+              <a href="https://www.cboe.com/us/indices/dashboard/VIX" target="_blank" rel="noopener noreferrer">VIX information ↗</a>
+              <a href="https://www.cboe.com/us/indices/dashboard/VIXEQ/" target="_blank" rel="noopener noreferrer">VIXEQ information ↗</a>
+              <a href="https://www.cboe.com/us/indices/dashboard/DSPX" target="_blank" rel="noopener noreferrer">DSPX information ↗</a>
+              <a href="https://www.cboe.com/us/indices/dashboard/COR1M" target="_blank" rel="noopener noreferrer">COR1M information ↗</a>
+            </div>
+          </div>
+
+          <article class="local-data-panel" aria-labelledby="local-data-heading">
+            <div class="local-data-topline">
+              <span class="privacy-badge">Processed locally</span>
+              <span class="session-badge">Session only</span>
+            </div>
+            <h3 id="local-data-heading" tabindex="-1">Open your local CSV files</h3>
+            <p>
+              Select up to four files. They are read in this browser tab and are not transmitted, uploaded or
+              saved by the dashboard. Reloading the page clears them.
+            </p>
+            <p class="local-data-format" id="local-data-format">
+              Accepted date formats: YYYY-MM-DD or MM/DD/YYYY. Use one indicator per file.
+            </p>
+            <div class="local-data-actions">
+              <input
+                class="local-file-input"
+                id="local-file-input"
+                type="file"
+                accept=".csv,text/csv"
+                aria-describedby="local-data-format local-data-status"
+                multiple
+              />
+              <button class="clear-local-button" id="clear-local-data" type="button" hidden>Clear local data</button>
+            </div>
+            <p class="local-data-status" id="local-data-status" role="status">No local files are active.</p>
+            <p class="local-data-alert" id="local-data-alert" role="alert" hidden></p>
+            <div class="local-data-summary" id="local-data-summary" hidden>
+              <p>Active local indicators</p>
+              <ul id="local-summary-list"></ul>
+            </div>
+            <p class="local-data-terms">
+              You remain responsible for obtaining the files lawfully and ensuring that your use is allowed.
+              This independent educational tool is not affiliated with or endorsed by Cboe.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="snapshot section-shell" aria-labelledby="snapshot-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">The snapshot</p>
+            <h2 id="snapshot-title">The signals behind today’s read</h2>
+          </div>
+          <p class="section-note" id="comparison-window">Percentiles use a common historical window.</p>
+        </div>
+        <p class="sr-only" id="metric-grid-status" role="status">Loading pinned indicators.</p>
+        <div class="metric-grid" id="metric-grid">
+          <div class="metric-skeleton"></div>
+          <div class="metric-skeleton"></div>
+          <div class="metric-skeleton"></div>
+          <div class="metric-skeleton"></div>
+        </div>
+      </section>
+
+      <section class="relationships section-shell" id="relationships" aria-labelledby="relationships-title">
+        <div class="section-heading relationships-heading">
+          <div>
+            <p class="eyebrow">Why this interpretation?</p>
+            <h2 id="relationships-title">Signals make sense together</h2>
+          </div>
+          <p class="section-note">
+            Select a node to see what it measures, how it connects, and whether it supports the current regime.
+          </p>
+        </div>
+
+        <div class="network-layout">
+          <article class="panel network-panel" aria-labelledby="network-panel-title">
+            <div class="network-toolbar">
+              <div>
+                <p class="panel-label">Active evidence network</p>
+                <h3 id="network-panel-title">How the pinned signals interact</h3>
+              </div>
+              <div class="network-legend" aria-label="Relationship legend">
+                <span><i class="legend-line solid"></i> Methodological</span>
+                <span><i class="legend-line dotted"></i> Component, contextual or regime</span>
+              </div>
+            </div>
+            <div class="network-stage" id="network-stage">
+              <canvas id="network-canvas" aria-hidden="true"></canvas>
+              <div class="network-node-layer" id="network-node-layer" role="group" aria-label="Indicators in the active regime"></div>
+            </div>
+            <p class="network-instruction">
+              Bright connections are part of the current interpretation. The map is structural and contextual; it does not claim simple causation.
+              The OFR component view is partial because the published Safe assets contribution is not included.
+            </p>
+          </article>
+
+          <aside class="panel network-inspector" id="network-inspector" aria-labelledby="network-detail-title">
+            <p class="panel-label">Selected signal</p>
+            <div class="network-detail-heading">
+              <span class="ticker" id="network-detail-ticker">FSI</span>
+              <span class="band-label" id="network-detail-band">Loading</span>
+            </div>
+            <h3 id="network-detail-title" tabindex="-1">Loading relationship…</h3>
+            <p id="network-detail-copy">Select a signal to inspect its role in the current regime.</p>
+            <dl class="network-stats">
+              <div><dt>Latest</dt><dd id="network-detail-value">Pending</dd></div>
+              <div><dt>Historical rank</dt><dd id="network-detail-rank">Pending</dd></div>
+            </dl>
+            <div class="connection-list-wrap">
+              <p class="connection-label">Direct connections</p>
+              <div class="connection-list" id="connection-list"></div>
+            </div>
+            <button class="network-open-button" id="network-open-button" type="button">Open indicator history</button>
+            <p class="sr-only" id="network-selection-status" role="status"></p>
+          </aside>
+        </div>
+
+        <div class="relationship-text-list" id="relationship-text-list" aria-label="Text summary of visible relationships"></div>
+      </section>
+
+      <section class="families section-shell" id="families" aria-labelledby="families-title">
+        <div class="section-heading families-heading">
+          <div>
+            <p class="eyebrow">Built to grow</p>
+            <h2 id="families-title">One dashboard, clear signal families</h2>
+          </div>
+          <p class="section-note">
+            Each family keeps its own cadence, source, percentile window and interpretation rules. Adding a short history will not distort every other signal.
+          </p>
+        </div>
+        <div class="family-grid" id="family-grid"></div>
+        <p class="roadmap-note" id="roadmap-note">The next additions are chosen for explanatory value and public-data practicality, not for quantity.</p>
+      </section>
+
+      <section class="detail section-shell" aria-labelledby="detail-title">
+        <div class="section-heading detail-heading">
+          <div>
+            <p class="eyebrow">Indicator explorer</p>
+            <h2 id="detail-title">Where does today sit?</h2>
+          </div>
+          <div class="segmented-control" id="index-picker" role="group" aria-label="Choose an indicator"></div>
+        </div>
+
+        <div class="detail-grid">
+          <article class="panel history-panel" aria-labelledby="history-title">
+            <div class="panel-head">
+              <div>
+                <p class="panel-label" id="history-frequency-label">Historical observations</p>
+                <h3 id="history-title">Loading history…</h3>
+              </div>
+              <div class="segmented-control range-control" id="range-picker" role="group" aria-label="Choose a time range">
+                <button type="button" data-range="1Y">1Y</button>
+                <button type="button" data-range="5Y" class="active" aria-pressed="true">5Y</button>
+                <button type="button" data-range="MAX">Max</button>
+              </div>
+            </div>
+            <div class="chart-wrap" id="line-chart-wrap">
+              <canvas id="line-chart" role="img" aria-label="Historical index line chart"></canvas>
+              <div class="chart-tooltip" id="line-tooltip" hidden></div>
+              <div class="chart-empty" id="line-empty" hidden>Historical data are unavailable.</div>
+            </div>
+            <label class="scrubber-label" for="chart-scrubber">Inspect a historical observation</label>
+            <input id="chart-scrubber" class="chart-scrubber" type="range" min="0" max="1" value="1" />
+            <p class="chart-point-readout" id="chart-point-readout" aria-live="polite"></p>
+            <div class="chart-source-row">
+              <span id="history-window-label">Historical observations</span>
+              <a id="index-source-link" href="https://www.financialresearch.gov/financial-stress-index/" target="_blank" rel="noopener noreferrer">Official source ↗</a>
+            </div>
+            <p class="sr-only" id="history-summary"></p>
+          </article>
+
+          <article class="panel distribution-panel" aria-labelledby="distribution-title">
+            <div class="panel-head">
+              <div>
+                <p class="panel-label">Historical distribution</p>
+                <h3 id="distribution-title">Position in the selected period</h3>
+              </div>
+              <span class="window-badge" id="window-badge">5 years</span>
+            </div>
+            <div class="percentile-lockup">
+              <div>
+                <span class="percentile-number" id="detail-percentile">…</span>
+                <span class="percentile-suffix">th percentile</span>
+              </div>
+              <span class="band-label" id="detail-band">Loading</span>
+            </div>
+            <div class="distribution-wrap">
+              <canvas id="distribution-chart" role="img" aria-label="Historical distribution histogram"></canvas>
+            </div>
+            <p class="distribution-explanation" id="distribution-explanation">
+              Loading the historical comparison…
+            </p>
+            <dl class="stat-row">
+              <div><dt>Low</dt><dd id="stat-low">Pending</dd></div>
+              <div><dt>Median</dt><dd id="stat-median">Pending</dd></div>
+              <div><dt>High</dt><dd id="stat-high">Pending</dd></div>
+              <div><dt>Observations</dt><dd id="stat-count">Pending</dd></div>
+            </dl>
+          </article>
+        </div>
+      </section>
+
+      <section class="explainer section-shell" id="explainer" aria-labelledby="explainer-title">
+        <div class="section-heading explainer-heading">
+          <div>
+            <p class="eyebrow">The mental model</p>
+            <h2 id="explainer-title">A regime is a pattern, not a number</h2>
+          </div>
+          <p class="section-note">
+            Every family answers a different question. The interpretation becomes stronger when independent families confirm the same story.
+          </p>
+        </div>
+
+        <div class="concept-flow">
+          <article class="concept-card">
+            <span class="concept-number">01</span>
+            <p class="concept-ticker">VOLATILITY &amp; INTERNALS</p>
+            <h3>How large, and how synchronized?</h3>
+            <p>Index volatility, constituent volatility, dispersion and correlation reveal whether moves reinforce or cancel one another.</p>
+          </article>
+          <div class="flow-operator" aria-hidden="true">↔</div>
+          <article class="concept-card">
+            <span class="concept-number">02</span>
+            <p class="concept-ticker">BREADTH &amp; CREDIT</p>
+            <h3>How widely is the story spreading?</h3>
+            <p>Breadth tests participation. Credit and funding conditions test whether stress has escaped the equity-options complex.</p>
+          </article>
+          <div class="flow-operator" aria-hidden="true">↔</div>
+          <article class="concept-card accent-card">
+            <span class="concept-number">03</span>
+            <p class="concept-ticker">RATES, CROSS-ASSET &amp; MACRO</p>
+            <h3>What is transmitting the regime?</h3>
+            <p>Rates, the dollar and growth data help distinguish a local rotation from a broader inflation, liquidity or economic shock.</p>
+          </article>
+        </div>
+
+        <div class="reading-guide">
+          <div>
+            <p class="guide-label">A useful question</p>
+            <blockquote>“Does the same story appear across markets, or only in one layer?”</blockquote>
+          </div>
+          <p>
+            One unusual indicator is context. Several independent indicators moving coherently are evidence. The dashboard should always show which signals support a regime and which ones contradict it.
+          </p>
+        </div>
+      </section>
+
+      <section class="methodology section-shell" aria-labelledby="methodology-title">
+        <div class="methodology-copy">
+          <p class="eyebrow">Methodology &amp; limits</p>
+          <h2 id="methodology-title">Transparent by design</h2>
+          <p>
+            Hosted observations come from public sources and retain their own release cadence, revision policy and
+            comparison window. Optional Cboe files are processed only in the current browser session.
+          </p>
+          <p class="source-credit">
+            Source: Office of Financial Research, <a href="https://www.financialresearch.gov/financial-stress-index/" target="_blank" rel="noopener noreferrer">OFR Financial Stress Index</a>, refreshed daily.
+          </p>
+        </div>
+        <div class="methodology-details">
+          <details>
+            <summary>How is the percentile calculated?</summary>
+            <p>
+              It is the midrank of the latest value among valid observations in the stated comparison window:
+              observations below it plus half of equal observations, divided by the total. A 90th percentile is
+              a historical rank, not a 90% probability of a future event.
+            </p>
+          </details>
+          <details>
+            <summary>How will daily and slower economic data be combined?</summary>
+            <p>
+              Market closes, weekly releases and monthly observations will keep separate timestamps. A regime can use the latest information that was genuinely available on its evaluation date, without pretending that every series updates together.
+            </p>
+          </details>
+          <details>
+            <summary>How should “typical” be understood?</summary>
+            <p>
+              “Typical” means within the central half of the selected historical sample. It does not mean safe,
+              permanent, or guaranteed to continue. Fixed rules such as “VIX 16 is normal” lose important context.
+            </p>
+          </details>
+          <details>
+            <summary>What happens when I open a local CSV?</summary>
+            <p>
+              The file is validated and converted to chart data in this browser tab. The latest value, historical
+              rank and summary statistics are calculated locally. The dashboard does not send the file or its
+              contents anywhere, and it does not retain them after a reload.
+            </p>
+          </details>
+          <details>
+            <summary>Are the public stress indicators substitutes for VIX or dispersion?</summary>
+            <p>
+              No. OFR categories measure broad financial stress and its contributions. They do not reproduce
+              option-implied index volatility, constituent volatility, dispersion or correlation. The two layers
+              answer different questions and become more informative when interpreted together.
+            </p>
+          </details>
+          <details>
+            <summary>What are the interpretation limits?</summary>
+            <p>
+              The regime summary is deterministic educational commentary based on relative historical ranks. It is
+              not a forecast, trading recommendation, or substitute for independent financial analysis.
+            </p>
+          </details>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div>
+        <span class="footer-brand">Market Surface</span>
+        <p>Built to make market internals easier to read.</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://www.financialresearch.gov/financial-stress-index/" target="_blank" rel="noopener noreferrer">OFR Financial Stress Index</a>
+        <a href="https://www.federalreserve.gov/data.htm" target="_blank" rel="noopener noreferrer">Federal Reserve data</a>
+        <a href="https://www.cboe.com/us/indices/" target="_blank" rel="noopener noreferrer">Cboe index information</a>
+      </div>
+      <p class="disclaimer">Educational information only · No investment advice</p>
+    </footer>
+
+    <noscript>
+      <div class="noscript">JavaScript is required to load public observations and process local CSV files.</div>
+    </noscript>
+  </body>
+</html>

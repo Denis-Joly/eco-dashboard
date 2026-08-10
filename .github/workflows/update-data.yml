@@ -1,0 +1,58 @@
+name: Update public economic data
+
+on:
+  schedule:
+    # OFR refreshes on U.S. business days with a short publication lag.
+    - cron: "30 16 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: public-economic-data-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  update-data:
+    if: github.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out the site
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Confirm hosted-source publication rights
+        run: node scripts/check-publication-readiness.mjs
+
+      - name: Refresh official OFR public data
+        run: node scripts/update-data.mjs
+
+      - name: Validate generated data
+        run: |
+          node --test test/*.test.mjs
+          git diff --check -- data/indices.json
+
+      - name: Commit and push changes
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+        run: |
+          if git diff --quiet -- data/indices.json; then
+            echo "Public data is already current."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/indices.json
+          git commit -m "chore(data): refresh public OFR data"
+          git pull --rebase origin "$BRANCH_NAME"
+          git push origin "HEAD:$BRANCH_NAME"
