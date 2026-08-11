@@ -4,11 +4,20 @@ import {
   parseLocalCsv,
 } from "./local-data.mjs";
 
-const CORE_INDICATORS = ["OFRFSI", "OFRVOL", "OFREQUITY", "OFRCREDIT", "OFRFUNDING"];
+const CORE_INDICATORS = [
+  "OFRFSI",
+  "OFRVOL",
+  "OFREQUITY",
+  "OFRSAFE",
+  "OFRCREDIT",
+  "OFRFUNDING",
+  "CURVE2S10S",
+  "REAL10Y",
+  "CPIYOY",
+  "EMPDIFF1M",
+  "DTWEXBGS",
+];
 const LOCAL_INDICATORS = new Set(["VIX", "VIXEQ", "DSPX", "COR1M"]);
-const INDICATOR_DISPLAY_ORDER = new Map(
-  [...CORE_INDICATORS, ...LOCAL_INDICATORS].map((id, index) => [id, index]),
-);
 
 const FALLBACK_META = {
   OFRFSI: {
@@ -41,6 +50,16 @@ const FALLBACK_META = {
     showChangePercent: false,
     definition: "The equity valuation category's contribution to the OFR Financial Stress Index",
   },
+  OFRSAFE: {
+    ticker: "SAFE",
+    name: "OFR Safe assets contribution",
+    cardName: "Safe assets contribution",
+    role: "Safe-haven stress",
+    color: "#65d6d0",
+    unitLabel: "Contribution points",
+    showChangePercent: false,
+    definition: "The safe-assets category's contribution to the OFR Financial Stress Index",
+  },
   OFRCREDIT: {
     ticker: "CREDIT",
     name: "OFR Credit contribution",
@@ -60,6 +79,56 @@ const FALLBACK_META = {
     unitLabel: "Contribution points",
     showChangePercent: false,
     definition: "The funding category's contribution to the OFR Financial Stress Index",
+  },
+  CURVE2S10S: {
+    ticker: "10Y-2Y",
+    name: "10-Year minus 2-Year Treasury spread",
+    cardName: "Yield-curve slope",
+    role: "Cycle context",
+    color: "#c9a9ff",
+    unitLabel: "Basis points",
+    showChangePercent: false,
+    definition: "The same-date difference between 10-year and 2-year Treasury yields",
+  },
+  REAL10Y: {
+    ticker: "REAL 10Y",
+    name: "10-Year Treasury inflation-indexed yield",
+    cardName: "Ten-year real yield",
+    role: "Real discount rate",
+    color: "#c9a9ff",
+    unitLabel: "Percent",
+    showChangePercent: false,
+    definition: "The market's inflation-adjusted 10-year Treasury yield",
+  },
+  CPIYOY: {
+    ticker: "CPI YoY",
+    name: "Consumer Price Index 12-month change",
+    cardName: "Headline inflation",
+    role: "Inflation pressure",
+    color: "#c9a9ff",
+    unitLabel: "Percent",
+    showChangePercent: false,
+    definition: "The 12-month percentage change in the headline Consumer Price Index",
+  },
+  EMPDIFF1M: {
+    ticker: "JOBS BREADTH",
+    name: "Private employment diffusion index",
+    cardName: "Private-sector job breadth",
+    role: "Labour breadth",
+    color: "#ff9f87",
+    unitLabel: "Diffusion index",
+    showChangePercent: false,
+    definition: "How widely monthly employment gains or losses are spread across private industries",
+  },
+  DTWEXBGS: {
+    ticker: "BROAD USD",
+    name: "Nominal Broad U.S. Dollar Index",
+    cardName: "Broad dollar",
+    role: "Global tightening context",
+    color: "#65d6d0",
+    unitLabel: "Index points",
+    showChangePercent: false,
+    definition: "The trade-weighted value of the U.S. dollar against a broad group of currencies",
   },
   VIX: {
     ticker: "VIX",
@@ -122,8 +191,12 @@ const ui = {
   updateChip: document.querySelector("#update-chip"),
   updateLabel: document.querySelector("#update-label"),
   comparisonWindow: document.querySelector("#comparison-window"),
+  sourceRetrievalDate: document.querySelector("#source-retrieval-date"),
   metricGrid: document.querySelector("#metric-grid"),
   metricGridStatus: document.querySelector("#metric-grid-status"),
+  ofrBreakdown: document.querySelector("#ofr-breakdown"),
+  ofrBreakdownList: document.querySelector("#ofr-breakdown-list"),
+  ofrBreakdownDate: document.querySelector("#ofr-breakdown-date"),
   regimeTitle: document.querySelector("#regime-title"),
   regimeCopy: document.querySelector("#regime-copy"),
   regimeAsOf: document.querySelector("#regime-as-of"),
@@ -175,7 +248,7 @@ const ui = {
   localDataHeading: document.querySelector("#local-data-heading"),
 };
 
-function liveIndicatorIds() {
+function availableIndicatorIds() {
   if (!state.catalog?.indicators) return CORE_INDICATORS.filter((id) => state.data?.indices[id]);
   const sectionOrder = new Map((state.catalog.sections || []).map((section) => [section.id, section.order || 999]));
   return Object.entries(state.catalog.indicators)
@@ -183,11 +256,15 @@ function liveIndicatorIds() {
       state.data?.indices[id] && (indicator.status === "live" || indicator.status === "local"),
     )
     .sort(([leftId, left], [rightId, right]) =>
-      (INDICATOR_DISPLAY_ORDER.get(leftId) ?? 999) - (INDICATOR_DISPLAY_ORDER.get(rightId) ?? 999) ||
+      (left.headlineOrder ?? 999) - (right.headlineOrder ?? 999) ||
       (sectionOrder.get(left.sectionId) || 999) - (sectionOrder.get(right.sectionId) || 999) ||
       (left.displayOrder || 999) - (right.displayOrder || 999),
     )
     .map(([id]) => id);
+}
+
+function liveIndicatorIds() {
+  return availableIndicatorIds();
 }
 
 function hostedIndicatorIds() {
@@ -198,9 +275,23 @@ function hostedIndicatorIds() {
 }
 
 function pinnedIndicatorIds() {
-  const live = liveIndicatorIds();
+  const live = availableIndicatorIds();
   if (!state.catalog?.indicators) return live;
   return live.filter((id) => state.catalog.indicators[id]?.pinned);
+}
+
+function pickerIndicatorIds() {
+  return availableIndicatorIds().filter((id) =>
+    state.catalog?.indicators?.[id]?.presentation?.picker !== false,
+  );
+}
+
+function guideIndicatorEntries() {
+  return Object.entries(state.catalog?.indicators || {}).filter(([id, indicator]) =>
+    ["live", "local"].includes(indicator.status) &&
+    (indicator.status === "local" || state.data?.indices[id]) &&
+    indicator.presentation?.guide !== false,
+  );
 }
 
 function metaFor(symbol) {
@@ -391,7 +482,9 @@ function daysBetween(a, b) {
 }
 
 function renderFreshness() {
-  const liveIds = hostedIndicatorIds();
+  const liveIds = hostedIndicatorIds().filter((id) =>
+    !state.catalog?.indicators?.[id]?.parentIndicatorId,
+  );
   const latestDates = liveIds.map((symbol) => state.data.indices[symbol]?.latest.date).filter(Boolean).sort();
   const newestLatest = latestDates.at(-1);
   const aligned = latestDates.length === liveIds.length && latestDates.every((date) => date === latestDates[0]);
@@ -414,6 +507,12 @@ function renderFreshness() {
     ui.updateLabel.textContent = aligned && allDaily
       ? `Latest public data · ${formatDate(newestLatest, { short: true })}`
       : `Public observations through ${formatDate(newestLatest, { short: true })}`;
+  }
+  if (ui.sourceRetrievalDate) {
+    const retrievalDate = String(state.data.retrievedAt || "").slice(0, 10);
+    ui.sourceRetrievalDate.textContent = parseDate(retrievalDate)
+      ? ` BLS data retrieved ${formatDate(retrievalDate, { short: true })}.`
+      : "";
   }
 }
 
@@ -439,7 +538,7 @@ function createMetricCard(symbol, item) {
   const change = item.latest.change;
   const changePercent = item.latest.changePercent;
   const changeText = Number.isFinite(change)
-    ? `${formatSigned(change)} ${meta.changeLabel}${meta.showChangePercent && Number.isFinite(changePercent) ? ` · ${formatSigned(changePercent, 1)}%` : ""}`
+    ? `${formatSigned(change, meta.decimals)} ${meta.changeLabel}${meta.showChangePercent && Number.isFinite(changePercent) ? ` · ${formatSigned(changePercent, 1)}%` : ""}`
     : "Change unavailable";
   const button = document.createElement("button");
   button.type = "button";
@@ -480,9 +579,53 @@ function renderCards() {
   ui.metricGridStatus.textContent = `${pinnedIds.length} pinned indicators shown.`;
 }
 
+function renderOfrBreakdown() {
+  if (!ui.ofrBreakdown || !ui.ofrBreakdownList) return;
+  const aggregateMeta = state.catalog?.indicators?.OFRFSI;
+  const componentIds = aggregateMeta?.componentIds || [];
+  const components = componentIds
+    .map((id) => [id, state.data.indices[id]])
+    .filter(([, item]) => item && Number.isFinite(item.latest.value));
+
+  ui.ofrBreakdown.hidden = components.length === 0;
+  if (!components.length) return;
+
+  const maximum = components.reduce(
+    (largest, [, item]) => Math.max(largest, Math.abs(item.latest.value)),
+    0,
+  ) || 1;
+  const dates = components.map(([, item]) => item.latest.date).filter(Boolean).sort();
+  ui.ofrBreakdownDate.textContent = dates.length && dates.every((date) => date === dates[0])
+    ? `Observed ${formatDate(dates[0], { short: true })}`
+    : "Latest available contribution from each category";
+  ui.ofrBreakdownList.replaceChildren();
+
+  for (const [symbol, item] of components) {
+    const meta = metaFor(symbol);
+    const value = item.latest.value;
+    const direction = value > 0 ? "Adds stress" : value < 0 ? "Offsets stress" : "Neutral";
+    const row = document.createElement("div");
+    row.className = `ofr-contribution${state.symbol === symbol ? " selected" : ""}`;
+    row.innerHTML = `
+      <div class="ofr-contribution-label">
+        <strong>${meta.cardName}</strong>
+        <span>${direction}</span>
+      </div>
+      <div class="ofr-contribution-scale" aria-hidden="true">
+        <span class="ofr-contribution-zero"></span>
+        <span class="ofr-contribution-bar ${value < 0 ? "negative" : "positive"}"
+          style="--magnitude:${Math.min(50, (Math.abs(value) / maximum) * 50)}%"></span>
+      </div>
+      <strong class="ofr-contribution-value">${formatSigned(value, meta.decimals)}</strong>
+      <button type="button" data-symbol="${symbol}" aria-label="Open ${meta.name} history">View history</button>`;
+    row.querySelector("button").addEventListener("click", () => selectIndex(symbol, true));
+    ui.ofrBreakdownList.append(row);
+  }
+}
+
 function renderIndexPicker() {
   ui.indexPicker.replaceChildren();
-  for (const symbol of liveIndicatorIds()) {
+  for (const symbol of pickerIndicatorIds()) {
     if (!state.data.indices[symbol]) continue;
     const button = document.createElement("button");
     button.type = "button";
@@ -599,7 +742,10 @@ function renderRegime() {
     ui.regimeCopy.textContent = state.activeRegime.copy;
   }
 
-  const evidenceIds = state.activeRegime?.requiredIndicators || pinnedIndicatorIds();
+  const rawEvidenceIds = state.activeRegime?.requiredIndicators || pinnedIndicatorIds();
+  const evidenceIds = [...new Set(rawEvidenceIds.map((id) =>
+    state.catalog?.indicators?.[id]?.parentIndicatorId || id,
+  ))];
   ui.signalList.replaceChildren();
   for (const symbol of evidenceIds) {
     const rank = state.data.indices[symbol]?.percentile.rank;
@@ -621,7 +767,9 @@ function renderFamilies() {
     const members = indicators
       .filter(([, indicator]) => indicator.sectionId === section.id)
       .sort(([, left], [, right]) => (left.displayOrder || 999) - (right.displayOrder || 999));
-    const live = members.filter(([, indicator]) => indicator.status === "live");
+    const live = members.filter(([, indicator]) =>
+      indicator.status === "live" && indicator.presentation?.family !== false && !indicator.parentIndicatorId,
+    );
     const local = members.filter(([, indicator]) => indicator.status === "local");
     const activeLocal = local.filter(([id]) => state.data?.indices[id]);
     const next = members.filter(([, indicator]) => indicator.status === "planned" && indicator.wave === 1).slice(0, 3);
@@ -669,8 +817,7 @@ function guideConnections(symbol, allowedIds) {
 
 function renderIndicatorGuide() {
   if (!ui.indicatorGuideGroups || !state.catalog?.indicators || !state.catalog?.sections) return;
-  const guideEntries = Object.entries(state.catalog.indicators)
-    .filter(([, indicator]) => ["live", "local"].includes(indicator.status));
+  const guideEntries = guideIndicatorEntries();
   const allowedIds = new Set(guideEntries.map(([id]) => id));
   const sections = [...state.catalog.sections].sort((left, right) => left.order - right.order);
   ui.indicatorGuideGroups.replaceChildren();
@@ -783,11 +930,11 @@ function drawNetwork() {
     const selected = relationship.source === state.networkSymbol || relationship.target === state.networkSymbol;
     const dotted = relationship.type !== "methodological";
     context.setLineDash(dotted ? [5, 6] : []);
-    context.lineWidth = selected ? 2.6 : active ? 1.8 : 1.2;
-    context.strokeStyle = selected
-      ? "rgba(217,239,114,0.92)"
-      : active
-        ? "rgba(144,240,196,0.62)"
+    context.lineWidth = active ? 2.6 : selected ? 1.8 : 1.2;
+    context.strokeStyle = active
+      ? "rgba(144,240,196,0.92)"
+      : selected
+        ? "rgba(214,230,214,0.36)"
         : "rgba(214,230,214,0.20)";
     context.beginPath();
     context.moveTo(startX, startY);
@@ -907,6 +1054,7 @@ function selectIndex(symbol, scrollToDetail = false) {
   state.symbol = symbol;
   state.inspectedIndex = null;
   renderCards();
+  renderOfrBreakdown();
   renderIndexPicker();
   renderDetail();
   if (ui.networkNodeLayer.querySelector(`[data-symbol="${symbol}"]`)) selectNetworkNode(symbol);
@@ -916,7 +1064,9 @@ function selectIndex(symbol, scrollToDetail = false) {
   }
   if (scrollToDetail) {
     const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    document.querySelector("#detail-title")?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    const detailTitle = document.querySelector("#detail-title");
+    detailTitle?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    detailTitle?.focus({ preventScroll: true });
   }
 }
 
@@ -1270,6 +1420,7 @@ function renderDashboard() {
   renderComparisonWindow();
   renderRegime();
   renderCards();
+  renderOfrBreakdown();
   renderIndexPicker();
   renderFamilies();
   renderIndicatorGuide();
@@ -1401,8 +1552,9 @@ function clearLocalData() {
   state.localSymbols.clear();
   state.localHistories.clear();
   state.localComparisonWindow = null;
-  if (LOCAL_INDICATORS.has(state.symbol)) state.symbol = hostedIndicatorIds()[0];
-  if (LOCAL_INDICATORS.has(state.networkSymbol)) state.networkSymbol = hostedIndicatorIds()[0];
+  const publicFallback = pickerIndicatorIds()[0] || pinnedIndicatorIds()[0] || hostedIndicatorIds()[0];
+  if (LOCAL_INDICATORS.has(state.symbol)) state.symbol = publicFallback;
+  if (LOCAL_INDICATORS.has(state.networkSymbol)) state.networkSymbol = publicFallback;
   ui.localDataAlert.hidden = true;
   ui.localDataAlert.textContent = "";
   renderDashboard();

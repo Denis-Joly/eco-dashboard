@@ -30,8 +30,18 @@
     "federal-reserve": {
       "name": "Board of Governors of the Federal Reserve System",
       "homepage": "https://www.federalreserve.gov/data.htm",
-      "licensingStatus": "public-domain-underlying-data-delivery-route-needed",
-      "publicDisplayAllowed": null
+      "licensingStatus": "public-domain-with-citation",
+      "publicDisplayAllowed": true,
+      "rightsUrl": "https://www.federalreserve.gov/disclaimer.htm",
+      "attribution": "Board of Governors of the Federal Reserve System."
+    },
+    "bls": {
+      "name": "U.S. Bureau of Labor Statistics",
+      "homepage": "https://www.bls.gov/data/",
+      "licensingStatus": "us-federal-government-work-public-domain",
+      "publicDisplayAllowed": true,
+      "rightsUrl": "https://www.bls.gov/opub/copyright-information.htm",
+      "attribution": "U.S. Bureau of Labor Statistics."
     },
     "dallas-fed": {
       "name": "Federal Reserve Bank of Dallas",
@@ -125,7 +135,7 @@
       "unit": { "kind": "volatility-points", "label": "Volatility points", "suffix": "", "decimals": 2, "changeLabel": "pts" },
       "interpretation": { "polarity": "contextual" },
       "historyStatus": { "kind": "mixed", "note": "The modern-method pre-2003 history was reconstructed by Cboe." },
-      "network": { "x": 18, "y": 54, "visible": true }
+      "network": { "x": 84, "y": 15, "visible": true }
     },
     "VIXEQ": {
       "ticker": "VIXEQ",
@@ -149,7 +159,7 @@
       "unit": { "kind": "volatility-points", "label": "Volatility points", "suffix": "", "decimals": 2, "changeLabel": "pts" },
       "interpretation": { "polarity": "contextual" },
       "historyStatus": { "kind": "mixed", "liveSince": "2024-11-04", "preLive": "back-tested" },
-      "network": { "x": 43, "y": 22, "visible": true }
+      "network": { "x": 12, "y": 15, "visible": true }
     },
     "DSPX": {
       "ticker": "DSPX",
@@ -173,7 +183,7 @@
       "unit": { "kind": "dispersion-points", "label": "Dispersion points", "suffix": "", "decimals": 2, "changeLabel": "pts" },
       "interpretation": { "polarity": "contextual" },
       "historyStatus": { "kind": "mixed", "liveSince": "2023-09-27", "preLive": "back-tested" },
-      "network": { "x": 92, "y": 50, "visible": true }
+      "network": { "x": 36, "y": 15, "visible": true }
     },
     "COR1M": {
       "ticker": "COR1M",
@@ -197,7 +207,7 @@
       "unit": { "kind": "percent", "label": "Implied correlation %", "suffix": "%", "decimals": 2, "changeLabel": "pts" },
       "interpretation": { "polarity": "contextual" },
       "historyStatus": { "kind": "mixed", "disseminatedSince": "2022-03-18", "preLive": "historical" },
-      "network": { "x": 53, "y": 76, "visible": true }
+      "network": { "x": 60, "y": 15, "visible": true }
     },
     "VIX9D": {
       "ticker": "VIX9D",
@@ -292,7 +302,9 @@
       "shortName": "Market volatility stress",
       "sectionId": "volatility-internals",
       "status": "live",
-      "pinned": true,
+      "pinned": false,
+      "parentIndicatorId": "OFRFSI",
+      "presentation": { "guide": false, "picker": false },
       "displayOrder": 90,
       "role": "Volatility contribution",
       "description": "Volatility-category contribution to the OFR Financial Stress Index.",
@@ -308,7 +320,7 @@
       "sourceUrl": "https://www.financialresearch.gov/financial-stress-index/",
       "unit": { "kind": "stress-contribution", "label": "Stress contribution", "suffix": "", "decimals": 2, "changeLabel": "pts" },
       "interpretation": { "polarity": "high-is-stress" },
-      "network": { "x": 18, "y": 24, "visible": true }
+      "network": { "visible": false }
     },
     "BREADTH200": {
       "ticker": "%>200D",
@@ -340,7 +352,9 @@
       "shortName": "Equity valuation stress",
       "sectionId": "breadth-leadership",
       "status": "live",
-      "pinned": true,
+      "pinned": false,
+      "parentIndicatorId": "OFRFSI",
+      "presentation": { "guide": false, "picker": false },
       "displayOrder": 30,
       "role": "Equity contribution",
       "description": "Equity-valuation contribution to the OFR Financial Stress Index.",
@@ -356,7 +370,7 @@
       "sourceUrl": "https://www.financialresearch.gov/financial-stress-index/",
       "unit": { "kind": "stress-contribution", "label": "Stress contribution", "suffix": "", "decimals": 2, "changeLabel": "pts" },
       "interpretation": { "polarity": "high-is-stress" },
-      "network": { "x": 82, "y": 24, "visible": true }
+      "network": { "visible": false }
     },
     "OFRFSI": {
       "ticker": "OFR FSI",
@@ -380,7 +394,8 @@
       "sourceUrl": "https://www.financialresearch.gov/financial-stress-index/",
       "unit": { "kind": "index-points", "label": "Index points", "suffix": "", "decimals": 2, "changeLabel": "pts" },
       "interpretation": { "polarity": "high-is-stress" },
-      "network": { "x": 50, "y": 52, "visible": true }
+      "componentIds": ["OFRVOL", "OFREQUITY", "OFRCREDIT", "OFRFUNDING", "OFRSAFE"],
+      "network": { "x": 68, "y": 51, "visible": true }
     },
     "OFRCREDIT": {
       "ticker": "OFR CREDIT",
@@ -388,7 +403,9 @@
       "shortName": "Credit-market stress",
       "sectionId": "credit-liquidity",
       "status": "live",
-      "pinned": true,
+      "pinned": false,
+      "parentIndicatorId": "OFRFSI",
+      "presentation": { "guide": false, "picker": false },
       "displayOrder": 10,
       "description": "Credit-market contribution to the OFR Financial Stress Index.",
       "howToRead": "Positive values mean credit conditions are adding to broad stress. A rise alongside funding stress is stronger evidence that pressure is spreading.",
@@ -404,7 +421,7 @@
       "sourceUrl": "https://www.financialresearch.gov/financial-stress-index/",
       "unit": { "kind": "stress-contribution", "label": "Stress contribution", "suffix": "", "decimals": 2, "changeLabel": "pts" },
       "interpretation": { "polarity": "high-is-stress" },
-      "network": { "x": 24, "y": 82, "visible": true }
+      "network": { "visible": false }
     },
     "OFRFUNDING": {
       "ticker": "OFR FUNDING",
@@ -412,7 +429,9 @@
       "shortName": "Funding and liquidity stress",
       "sectionId": "credit-liquidity",
       "status": "live",
-      "pinned": true,
+      "pinned": false,
+      "parentIndicatorId": "OFRFSI",
+      "presentation": { "guide": false, "picker": false },
       "displayOrder": 20,
       "description": "Funding-market contribution to the OFR Financial Stress Index.",
       "howToRead": "Positive values mean funding and liquidity conditions are adding to stress. A rise alongside credit stress is stronger evidence of broad transmission.",
@@ -428,7 +447,7 @@
       "sourceUrl": "https://www.financialresearch.gov/financial-stress-index/",
       "unit": { "kind": "stress-contribution", "label": "Stress contribution", "suffix": "", "decimals": 2, "changeLabel": "pts" },
       "interpretation": { "polarity": "high-is-stress" },
-      "network": { "x": 76, "y": 82, "visible": true }
+      "network": { "visible": false }
     },
     "HY_OAS": {
       "ticker": "HY OAS",
@@ -459,23 +478,25 @@
       "name": "10-Year Treasury minus 2-Year Treasury spread",
       "shortName": "Yield-curve slope",
       "sectionId": "rates-inflation",
-      "status": "planned",
-      "wave": 1,
+      "status": "live",
+      "pinned": true,
       "displayOrder": 10,
-      "description": "Dashboard-calculated same-date difference between the 10-year and 2-year Treasury constant-maturity yields.",
+      "role": "Cycle and policy slope",
+      "description": "Same-date difference between the Federal Reserve's 10-year and 2-year Treasury constant-maturity yields.",
+      "howToRead": "A value below zero is an inverted curve. A positive and steepening spread can reflect easier policy expectations or improving growth, so the direction and the other indicators matter more than a single threshold.",
       "whyAdd": "Adds cycle context and distinguishes market stress from a change in the rates regime.",
       "frequency": "daily",
       "calendar": "us-business-days",
-      "timezone": "America/Chicago",
-      "observationSemantics": "Dashboard calculation: 100 × (DGS10 minus DGS2) on dates where both inputs are available",
+      "timezone": "America/New_York",
+      "observationSemantics": "Dashboard calculation from Federal Reserve H.15: 100 × (10-year yield minus 2-year yield) on dates where both inputs are available",
       "observationLabel": "daily observations",
       "staleAfterDays": 7,
-      "sourceRef": "dashboard-calculation",
-      "sourceUrl": "https://fred.stlouisfed.org/series/DGS10",
-      "deliveryStatus": "planned-terms-compliant-input-route-required",
+      "sourceRef": "federal-reserve",
+      "sourceUrl": "https://www.federalreserve.gov/releases/h15/",
       "calculation": { "formula": "100 × (DGS10 - DGS2)", "inputs": ["DGS10", "DGS2"], "calculatedBy": "Economic Dashboard" },
       "unit": { "kind": "basis-points", "label": "Basis points", "suffix": " bp", "decimals": 0, "changeLabel": "bp" },
-      "interpretation": { "polarity": "contextual" }
+      "interpretation": { "polarity": "contextual" },
+      "network": { "x": 28, "y": 85, "visible": true }
     },
     "DGS2": {
       "ticker": "DGS2",
@@ -549,12 +570,49 @@
       "name": "10-Year Treasury real yield",
       "shortName": "Real discount rate",
       "sectionId": "rates-inflation",
-      "status": "planned",
-      "wave": 2,
+      "status": "live",
+      "pinned": true,
       "displayOrder": 20,
+      "role": "Inflation-adjusted discount rate",
+      "description": "Daily 10-year inflation-indexed Treasury yield at constant maturity, published in the Federal Reserve's H.15 release.",
+      "howToRead": "Higher real yields raise the inflation-adjusted discount rate applied to long-duration assets. A rise can pressure valuations, but it can also accompany stronger growth expectations.",
       "whyAdd": "Shows the inflation-adjusted discount rate applied to long-duration assets.",
-      "sourceRef": "treasury",
-      "sourceUrl": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_real_yield_curve"
+      "frequency": "daily",
+      "calendar": "us-business-days",
+      "timezone": "America/New_York",
+      "observationSemantics": "Federal Reserve H.15 daily 10-year inflation-indexed Treasury constant-maturity yield",
+      "observationLabel": "daily observations",
+      "staleAfterDays": 7,
+      "sourceRef": "federal-reserve",
+      "sourceUrl": "https://www.federalreserve.gov/releases/h15/",
+      "unit": { "kind": "percent", "label": "Percent", "suffix": "%", "decimals": 2, "changeLabel": "pp" },
+      "interpretation": { "polarity": "contextual" },
+      "network": { "x": 36, "y": 51, "visible": true }
+    },
+    "CPIYOY": {
+      "ticker": "CPI YOY",
+      "name": "Consumer Price Index year-over-year inflation",
+      "shortName": "Headline inflation",
+      "sectionId": "rates-inflation",
+      "status": "live",
+      "pinned": true,
+      "displayOrder": 25,
+      "role": "Realized inflation",
+      "description": "Twelve-month percentage change in the all-items Consumer Price Index for All Urban Consumers.",
+      "howToRead": "Higher values mean consumer prices rose faster than a year earlier. Compare CPI inflation with real yields and the curve to distinguish an inflation shock from a growth scare. Its dashboard percentile uses a January 1991 baseline so the comparison reflects the modern inflation-policy era.",
+      "frequency": "monthly",
+      "publicationLagDays": 14,
+      "calendar": "monthly",
+      "timezone": "America/New_York",
+      "observationSemantics": "Dashboard calculation from BLS series CUUR0000SA0: 100 × (current CPI divided by CPI 12 months earlier minus 1)",
+      "observationLabel": "monthly observations",
+      "staleAfterDays": 75,
+      "sourceRef": "bls",
+      "sourceUrl": "https://data.bls.gov/timeseries/CUUR0000SA0",
+      "calculation": { "formula": "100 × (CPI[t] / CPI[t-12] - 1)", "inputs": ["CUUR0000SA0"], "calculatedBy": "Economic Dashboard" },
+      "unit": { "kind": "percent", "label": "Percent year over year", "suffix": "%", "decimals": 2, "changeLabel": "pp" },
+      "interpretation": { "polarity": "high-is-inflation" },
+      "network": { "x": 12, "y": 51, "visible": true }
     },
     "T10YIE": {
       "ticker": "10Y BE",
@@ -601,6 +659,30 @@
       "sourceRef": "fred",
       "sourceUrl": "https://fred.stlouisfed.org/series/ICSA"
     },
+    "EMPDIFF1M": {
+      "ticker": "EMP DIFF",
+      "name": "Total private employment diffusion index, 1-month span",
+      "shortName": "Employment breadth",
+      "sectionId": "growth-cycle",
+      "status": "live",
+      "pinned": true,
+      "displayOrder": 15,
+      "role": "Labour-market breadth",
+      "description": "BLS diffusion index measuring how broadly total private payroll employment increased across industries over one month.",
+      "howToRead": "Values above 50 mean more industries added jobs than cut them, while values below 50 mean losses were more widespread. It measures breadth, not the number of jobs created.",
+      "frequency": "monthly",
+      "publicationLagDays": 7,
+      "calendar": "monthly",
+      "timezone": "America/New_York",
+      "observationSemantics": "BLS Current Employment Statistics seasonally adjusted one-month diffusion index for total private employment",
+      "observationLabel": "monthly observations",
+      "staleAfterDays": 45,
+      "sourceRef": "bls",
+      "sourceUrl": "https://data.bls.gov/timeseries/CES0500000021",
+      "unit": { "kind": "diffusion-index", "label": "Diffusion index, 50 neutral", "suffix": "", "decimals": 1, "changeLabel": "pts" },
+      "interpretation": { "polarity": "high-is-growth" },
+      "network": { "x": 58, "y": 85, "visible": true }
+    },
     "WEI": {
       "ticker": "WEI",
       "name": "Dallas Fed Weekly Economic Index",
@@ -628,10 +710,12 @@
       "name": "Nominal Broad U.S. Dollar Index",
       "shortName": "Global tightening confirmation",
       "sectionId": "cross-asset",
-      "status": "planned",
-      "wave": 1,
+      "status": "live",
+      "pinned": true,
       "displayOrder": 10,
+      "role": "Cross-asset financial conditions",
       "description": "Trade-weighted foreign-exchange value of the U.S. dollar against a broad group of major trading partners.",
+      "howToRead": "A higher value means a stronger trade-weighted dollar. A rapid rise can tighten global financial conditions, but the level is most useful when confirmed by broad financial stress.",
       "whyAdd": "A stronger broad dollar can confirm that equity or funding stress is becoming a global tightening event.",
       "frequency": "daily",
       "publicationCadence": "weekly",
@@ -643,7 +727,34 @@
       "sourceRef": "federal-reserve",
       "sourceUrl": "https://www.federalreserve.gov/releases/h10/summary/",
       "unit": { "kind": "index-points", "label": "Index points", "suffix": "", "decimals": 2, "changeLabel": "pts" },
-      "interpretation": { "polarity": "contextual" }
+      "interpretation": { "polarity": "contextual" },
+      "network": { "x": 90, "y": 51, "visible": true }
+    },
+    "OFRSAFE": {
+      "ticker": "OFR SAFE",
+      "name": "OFR Financial Stress Index: Safe assets contribution",
+      "shortName": "Safe-asset stress",
+      "sectionId": "cross-asset",
+      "status": "live",
+      "pinned": false,
+      "parentIndicatorId": "OFRFSI",
+      "presentation": { "guide": false, "picker": false },
+      "displayOrder": 20,
+      "role": "Safe-assets contribution",
+      "description": "Safe-assets category contribution to the OFR Financial Stress Index.",
+      "howToRead": "Positive values mean conditions in markets commonly used as safe assets are adding to broad financial stress; negative values mean they are offsetting it. This is a signed contribution, not an asset return.",
+      "frequency": "daily",
+      "publicationLagDays": 2,
+      "calendar": "us-business-days",
+      "timezone": "America/New_York",
+      "observationSemantics": "OFR-calculated category contribution",
+      "observationLabel": "daily contributions",
+      "staleAfterDays": 7,
+      "sourceRef": "ofr",
+      "sourceUrl": "https://www.financialresearch.gov/financial-stress-index/",
+      "unit": { "kind": "stress-contribution", "label": "Stress contribution", "suffix": "", "decimals": 2, "changeLabel": "pts" },
+      "interpretation": { "polarity": "high-is-stress" },
+      "network": { "visible": false }
     }
   },
   "relationships": [
@@ -756,6 +867,15 @@
       "explanation": "The published funding category is one component of the aggregate OFR Financial Stress Index."
     },
     {
+      "id": "ofr-safe-assets-to-fsi",
+      "source": "OFRSAFE",
+      "target": "OFRFSI",
+      "type": "component",
+      "direction": "contributes",
+      "label": "Safe assets contribute to broad stress",
+      "explanation": "The published safe-assets category is one component of the aggregate OFR Financial Stress Index."
+    },
+    {
       "id": "credit-to-index-vol",
       "source": "OFRCREDIT",
       "target": "VIX",
@@ -817,6 +937,60 @@
       "direction": "qualifies",
       "label": "Real rates shape equity leadership",
       "explanation": "Changes in real yields can help explain whether narrow leadership reflects a shifting discount-rate regime."
+    },
+    {
+      "id": "yield-curve-to-employment-breadth",
+      "source": "CURVE2S10S",
+      "target": "EMPDIFF1M",
+      "type": "macro-context",
+      "direction": "qualifies",
+      "label": "The curve adds forward context to employment breadth",
+      "explanation": "A weak employment diffusion reading carries more cycle information when the yield curve also signals a restrictive or late-cycle backdrop."
+    },
+    {
+      "id": "employment-breadth-to-fsi",
+      "source": "EMPDIFF1M",
+      "target": "OFRFSI",
+      "type": "macro-context",
+      "direction": "qualifies",
+      "label": "Employment breadth tests real-economy transmission",
+      "explanation": "Falling employment breadth can confirm that elevated financial stress is reaching a wider set of industries, while resilient breadth argues for caution about that conclusion."
+    },
+    {
+      "id": "real-yield-to-fsi",
+      "source": "REAL10Y",
+      "target": "OFRFSI",
+      "type": "macro-context",
+      "direction": "qualifies",
+      "label": "Real yields identify discount-rate pressure",
+      "explanation": "High real yields alongside elevated financial stress are consistent with tighter inflation-adjusted financing conditions, but real yields are not a standalone stress measure."
+    },
+    {
+      "id": "cpi-to-real-yield",
+      "source": "CPIYOY",
+      "target": "REAL10Y",
+      "type": "macro-context",
+      "direction": "qualifies",
+      "label": "Inflation provides context for real yields",
+      "explanation": "Reading realized inflation with the real yield helps distinguish inflation pressure from changes in the inflation-adjusted discount rate."
+    },
+    {
+      "id": "broad-dollar-to-fsi",
+      "source": "DTWEXBGS",
+      "target": "OFRFSI",
+      "type": "cross-market",
+      "direction": "confirms",
+      "label": "The dollar tests global tightening",
+      "explanation": "A historically strong broad dollar alongside elevated financial stress is stronger evidence of global tightening than either indicator alone."
+    },
+    {
+      "id": "vix-to-fsi",
+      "source": "VIX",
+      "target": "OFRFSI",
+      "type": "cross-market",
+      "direction": "confirms",
+      "label": "Index volatility tests broader stress",
+      "explanation": "When locally supplied VIX data and the public OFR aggregate are both elevated, equity volatility is more likely to reflect broad financial stress than an isolated options-market move."
     }
   ],
   "regimes": [
@@ -826,17 +1000,15 @@
       "minObservations": 252,
       "alignment": { "policy": "max-gap", "maxGapDays": 7 },
       "title": "High dispersion, contained systemic stress",
-      "copy": "The local options layer shows elevated constituent volatility and dispersion with low implied correlation, while the public OFR aggregate, credit and funding readings are not historically elevated. This is more consistent with stock-specific rotation than broad financial-system stress.",
-      "requiredIndicators": ["VIX", "VIXEQ", "DSPX", "COR1M", "OFRFSI", "OFRCREDIT", "OFRFUNDING"],
-      "evidenceRelationships": ["constituent-vol-to-dispersion", "dispersion-to-correlation", "credit-to-index-vol", "funding-to-correlation"],
+      "copy": "The local options layer shows elevated constituent volatility and dispersion with low implied correlation, while the public OFR aggregate is not historically elevated. This is more consistent with stock-specific rotation than broad financial-system stress.",
+      "requiredIndicators": ["VIX", "VIXEQ", "DSPX", "COR1M", "OFRFSI"],
+      "evidenceRelationships": ["constituent-vol-to-dispersion", "dispersion-to-correlation", "vix-to-fsi"],
       "conditions": [
         { "indicatorId": "VIX", "metric": "percentile", "operator": "lt", "value": 75 },
         { "indicatorId": "VIXEQ", "metric": "percentile", "operator": "gt", "value": 75 },
         { "indicatorId": "DSPX", "metric": "percentile", "operator": "gt", "value": 75 },
         { "indicatorId": "COR1M", "metric": "percentile", "operator": "lt", "value": 25 },
-        { "indicatorId": "OFRFSI", "metric": "percentile", "operator": "lt", "value": 75 },
-        { "indicatorId": "OFRCREDIT", "metric": "percentile", "operator": "lt", "value": 75 },
-        { "indicatorId": "OFRFUNDING", "metric": "percentile", "operator": "lt", "value": 75 }
+        { "indicatorId": "OFRFSI", "metric": "percentile", "operator": "lt", "value": 75 }
       ]
     },
     {
@@ -846,8 +1018,8 @@
       "alignment": { "policy": "max-gap", "maxGapDays": 7 },
       "title": "Systemic stress is confirming the market signal",
       "copy": "The local options layer shows elevated index volatility and implied correlation, while the public OFR aggregate is also historically elevated. Market co-movement and broader financial stress are reinforcing the same risk story.",
-      "requiredIndicators": ["VIX", "COR1M", "OFRFSI", "OFRVOL", "OFRCREDIT", "OFRFUNDING"],
-      "evidenceRelationships": ["correlation-to-index-vol", "ofr-volatility-to-fsi", "ofr-credit-to-fsi", "ofr-funding-to-fsi", "credit-to-index-vol", "funding-to-correlation"],
+      "requiredIndicators": ["VIX", "COR1M", "OFRFSI"],
+      "evidenceRelationships": ["correlation-to-index-vol", "vix-to-fsi"],
       "conditions": [
         { "indicatorId": "VIX", "metric": "percentile", "operator": "gt", "value": 75 },
         { "indicatorId": "COR1M", "metric": "percentile", "operator": "gt", "value": 75 },
@@ -885,6 +1057,49 @@
       ]
     },
     {
+      "id": "public-tightening-with-stress",
+      "priority": 75,
+      "minObservations": 120,
+      "alignment": { "policy": "max-gap", "maxGapDays": 45 },
+      "title": "Broad tightening is confirming financial stress",
+      "copy": "The OFR Financial Stress Index, the 10-year real yield and the broad dollar are all in the upper quarter of their histories. This combination is consistent with tight inflation-adjusted and global financial conditions, not an isolated market move.",
+      "requiredIndicators": ["OFRFSI", "REAL10Y", "DTWEXBGS"],
+      "evidenceRelationships": ["real-yield-to-fsi", "broad-dollar-to-fsi"],
+      "conditions": [
+        { "indicatorId": "OFRFSI", "metric": "percentile", "operator": "gt", "value": 75 },
+        { "indicatorId": "REAL10Y", "metric": "percentile", "operator": "gt", "value": 75 },
+        { "indicatorId": "DTWEXBGS", "metric": "percentile", "operator": "gt", "value": 75 }
+      ]
+    },
+    {
+      "id": "curve-and-employment-warning",
+      "priority": 70,
+      "minObservations": 120,
+      "alignment": { "policy": "max-gap", "maxGapDays": 45 },
+      "title": "The curve and employment breadth signal cycle weakness",
+      "copy": "The 10-year minus 2-year Treasury spread and the one-month employment diffusion index are both in the lower quarter of their histories. Together they are a cautious warning that restrictive rates are being accompanied by narrower hiring, not a precise recession timer.",
+      "requiredIndicators": ["CURVE2S10S", "EMPDIFF1M"],
+      "evidenceRelationships": ["yield-curve-to-employment-breadth"],
+      "conditions": [
+        { "indicatorId": "CURVE2S10S", "metric": "percentile", "operator": "lt", "value": 25 },
+        { "indicatorId": "EMPDIFF1M", "metric": "percentile", "operator": "lt", "value": 25 }
+      ]
+    },
+    {
+      "id": "inflation-and-real-rate-pressure",
+      "priority": 65,
+      "minObservations": 120,
+      "alignment": { "policy": "max-gap", "maxGapDays": 75 },
+      "title": "Inflation and real-rate pressure are both elevated",
+      "copy": "Headline CPI inflation and the 10-year real yield are both in the upper quarter of their histories. That combination can be difficult for long-duration assets, although it does not by itself establish broad financial stress.",
+      "requiredIndicators": ["CPIYOY", "REAL10Y"],
+      "evidenceRelationships": ["cpi-to-real-yield"],
+      "conditions": [
+        { "indicatorId": "CPIYOY", "metric": "percentile", "operator": "gt", "value": 75 },
+        { "indicatorId": "REAL10Y", "metric": "percentile", "operator": "gt", "value": 75 }
+      ]
+    },
+    {
       "id": "subdued-volatility",
       "priority": 60,
       "minObservations": 252,
@@ -900,14 +1115,30 @@
       ]
     },
     {
+      "id": "contained-stress-with-positive-breadth",
+      "priority": 55,
+      "minObservations": 120,
+      "alignment": { "policy": "max-gap", "maxGapDays": 45 },
+      "title": "Stress is contained and economic breadth remains positive",
+      "copy": "Broad financial stress is below its upper historical quartile, while the yield curve and private-employment breadth are both above their lower quartiles. The public signals do not currently confirm an acute systemic or cycle shock, although that is not a forecast that conditions will remain benign.",
+      "requiredIndicators": ["OFRFSI", "CURVE2S10S", "EMPDIFF1M"],
+      "evidenceRelationships": ["yield-curve-to-employment-breadth", "employment-breadth-to-fsi"],
+      "conditions": [
+        { "indicatorId": "OFRFSI", "metric": "percentile", "operator": "lt", "value": 75 },
+        { "indicatorId": "CURVE2S10S", "metric": "percentile", "operator": "gt", "value": 25 },
+        { "indicatorId": "EMPDIFF1M", "metric": "percentile", "operator": "gt", "value": 25 },
+        { "indicatorId": "EMPDIFF1M", "metric": "value", "operator": "gte", "value": 50 }
+      ]
+    },
+    {
       "id": "ofr-elevated-stress",
       "priority": 50,
       "minObservations": 252,
       "alignment": { "policy": "same-date" },
       "title": "Broad financial stress is elevated",
       "copy": "The aggregate OFR Financial Stress Index is in the upper quarter of its compatible history. Its category contributions show which channels are adding to or offsetting the pressure.",
-      "requiredIndicators": ["OFRFSI", "OFRVOL", "OFREQUITY", "OFRCREDIT", "OFRFUNDING"],
-      "evidenceRelationships": ["ofr-volatility-to-fsi", "ofr-equity-to-fsi", "ofr-credit-to-fsi", "ofr-funding-to-fsi"],
+      "requiredIndicators": ["OFRFSI"],
+      "evidenceRelationships": ["ofr-volatility-to-fsi", "ofr-equity-to-fsi", "ofr-credit-to-fsi", "ofr-funding-to-fsi", "ofr-safe-assets-to-fsi"],
       "conditions": [
         { "indicatorId": "OFRFSI", "metric": "percentile", "operator": "gt", "value": 75 }
       ]
@@ -919,8 +1150,8 @@
       "alignment": { "policy": "same-date" },
       "title": "Broad financial stress is subdued",
       "copy": "The aggregate OFR Financial Stress Index is in the lower quarter of its compatible history. Individual category contributions can still diverge, so the calm aggregate should not be read as an absence of all risk.",
-      "requiredIndicators": ["OFRFSI", "OFRVOL", "OFREQUITY", "OFRCREDIT", "OFRFUNDING"],
-      "evidenceRelationships": ["ofr-volatility-to-fsi", "ofr-equity-to-fsi", "ofr-credit-to-fsi", "ofr-funding-to-fsi"],
+      "requiredIndicators": ["OFRFSI"],
+      "evidenceRelationships": ["ofr-volatility-to-fsi", "ofr-equity-to-fsi", "ofr-credit-to-fsi", "ofr-funding-to-fsi", "ofr-safe-assets-to-fsi"],
       "conditions": [
         { "indicatorId": "OFRFSI", "metric": "percentile", "operator": "lt", "value": 25 }
       ]
@@ -932,8 +1163,8 @@
       "alignment": { "policy": "same-date" },
       "title": "Financial-stress signals are mixed",
       "copy": "The aggregate OFR reading is not historically extreme. Its category contributions show where stress is accumulating and where pressures are offsetting one another.",
-      "requiredIndicators": ["OFRFSI", "OFRVOL", "OFREQUITY", "OFRCREDIT", "OFRFUNDING"],
-      "evidenceRelationships": ["ofr-volatility-to-fsi", "ofr-equity-to-fsi", "ofr-credit-to-fsi", "ofr-funding-to-fsi"],
+      "requiredIndicators": ["OFRFSI"],
+      "evidenceRelationships": ["ofr-volatility-to-fsi", "ofr-equity-to-fsi", "ofr-credit-to-fsi", "ofr-funding-to-fsi", "ofr-safe-assets-to-fsi"],
       "conditions": []
     }
   ]

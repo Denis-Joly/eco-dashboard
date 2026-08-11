@@ -799,7 +799,134 @@ input {
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  align-items: start;
   gap: 14px;
+}
+
+.ofr-breakdown {
+  min-height: auto;
+  margin-top: 14px;
+  padding: 24px;
+}
+
+.ofr-breakdown-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.ofr-breakdown-heading h3 {
+  margin: 5px 0 7px;
+  font-family: var(--display);
+  font-size: 1.55rem;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.ofr-breakdown-heading p,
+.ofr-breakdown-heading > span {
+  margin: 0;
+  color: var(--ink-faint);
+  font-size: 0.7rem;
+}
+
+.ofr-breakdown-heading > div > p:last-child {
+  max-width: 680px;
+}
+
+.ofr-breakdown-heading > span {
+  flex: 0 0 auto;
+  padding-top: 7px;
+}
+
+.ofr-breakdown-list {
+  display: grid;
+  margin-top: 22px;
+  gap: 8px;
+}
+
+.ofr-contribution {
+  display: grid;
+  min-height: 58px;
+  padding: 8px 9px 8px 13px;
+  grid-template-columns: minmax(145px, 0.72fr) minmax(160px, 1.5fr) 72px 106px;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.ofr-contribution.selected {
+  border-color: rgba(144, 240, 196, 0.36);
+  background: rgba(144, 240, 196, 0.035);
+}
+
+.ofr-contribution-label {
+  display: grid;
+  gap: 3px;
+}
+
+.ofr-contribution-label strong {
+  font-size: 0.72rem;
+}
+
+.ofr-contribution-label span {
+  color: var(--ink-faint);
+  font-size: 0.62rem;
+}
+
+.ofr-contribution-scale {
+  position: relative;
+  height: 16px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.ofr-contribution-zero {
+  position: absolute;
+  width: 1px;
+  inset: -4px auto -4px 50%;
+  background: rgba(243, 245, 233, 0.32);
+}
+
+.ofr-contribution-bar {
+  position: absolute;
+  width: var(--magnitude);
+  inset: 3px auto 3px 50%;
+  border-radius: 3px;
+  background: var(--coral);
+}
+
+.ofr-contribution-bar.negative {
+  inset: 3px 50% 3px auto;
+  background: var(--mint);
+}
+
+.ofr-contribution-value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.ofr-contribution button {
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-size: 0.65rem;
+  font-weight: 760;
+}
+
+.ofr-contribution button:hover,
+.ofr-contribution button:focus-visible {
+  border-color: var(--mint);
+  color: var(--mint);
 }
 
 .network-layout {
@@ -853,7 +980,7 @@ input {
 .network-stage {
   position: relative;
   overflow: hidden;
-  height: 380px;
+  height: 440px;
   margin-top: 22px;
   border: 1px solid var(--line);
   border-radius: 17px;
@@ -892,8 +1019,8 @@ input {
 .network-node {
   display: flex;
   position: absolute;
-  width: 84px;
-  height: 84px;
+  width: 74px;
+  height: 74px;
   padding: 8px;
   align-items: center;
   justify-content: center;
@@ -1074,7 +1201,7 @@ input {
 .relationship-text-list {
   display: grid;
   margin-top: 14px;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 10px;
 }
 
@@ -2008,6 +2135,35 @@ input {
 
   .panel {
     padding: 18px;
+  }
+
+  .ofr-breakdown-heading {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ofr-breakdown-heading > span {
+    padding-top: 0;
+  }
+
+  .ofr-contribution {
+    grid-template-columns: minmax(0, 1fr) 72px;
+    gap: 8px 12px;
+  }
+
+  .ofr-contribution-scale {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .ofr-contribution-value {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .ofr-contribution button {
+    grid-column: 1 / -1;
+    grid-row: 3;
   }
 
   .panel-head {

@@ -13,17 +13,18 @@ Market Surface was designed and coded by Denis Joly with assistance from Codex, 
 
 ## Public layer
 
-The hosted dataset contains only published outputs from the [Office of Financial Research Financial Stress Index](https://www.financialresearch.gov/financial-stress-index/):
+The hosted dataset combines official, openly reusable government outputs from three public institutions:
 
-- OFR Financial Stress Index
-- Volatility contribution
-- Equity valuation contribution
-- Credit contribution
-- Funding contribution
+- [Office of Financial Research](https://www.financialresearch.gov/financial-stress-index/): the aggregate OFR Financial Stress Index and its complete five-category decomposition
+- [Federal Reserve H.15](https://www.federalreserve.gov/releases/h15/): 2-year and 10-year nominal Treasury yields, used to calculate the 10Y minus 2Y curve, plus the 10-year real Treasury yield
+- [Federal Reserve H.10](https://www.federalreserve.gov/releases/h10/): the Nominal Broad U.S. Dollar Index
+- [U.S. Bureau of Labor Statistics](https://www.bls.gov/): headline CPI, used to calculate its 12-month change, and the one-month private-employment diffusion index
 
-These are daily market-based stress measures with a two-business-day publication lag. The category contributions help distinguish a market-specific disturbance from stress that is spreading through credit or funding channels.
+The OFR categories are presented as signed contributions to one aggregate indicator, not as five independent headline signals. Positive contributions add stress and negative contributions offset it.
 
-Source: Office of Financial Research, "OFR Financial Stress Index." See the [OFR legal notice](https://www.financialresearch.gov/legal-notices/). The hosted file contains OFR's aggregate and category outputs, not the 33 proprietary underlying inputs.
+The public network connects systemic stress, the yield curve, real rates, inflation, employment breadth and the dollar. These families answer different questions and should be interpreted together. For example, rising OFR stress with employment breadth below 50 tells a different story from high real yields with broad employment growth and subdued financial stress.
+
+Sources and reuse notes: Office of Financial Research, "OFR Financial Stress Index," under the [OFR legal notice](https://www.financialresearch.gov/legal-notices/); Board of Governors of the Federal Reserve System, H.15 and H.10 statistical releases, under the [Board disclaimer](https://www.federalreserve.gov/disclaimer.htm); and U.S. Bureau of Labor Statistics, under the [BLS copyright policy](https://www.bls.gov/opub/copyright-information.htm). The hosted file contains only published outputs and dashboard calculations, not OFR's 33 proprietary underlying inputs. The BLS access date is retained in the generated payload. As required by the BLS API terms: "BLS.gov cannot vouch for the data or analyses derived from these data after the data have been retrieved from BLS.gov."
 
 ## Private local layer
 
@@ -59,7 +60,7 @@ Indicators are organised into six families:
 5. Growth and the economic cycle
 6. Cross-asset confirmation
 
-The catalog already contains a rights-aware roadmap for direct Federal Reserve inputs, calculated yield-curve and rate-volatility measures, the Dallas Fed Weekly Economic Index and other future signals. Planned sources are not promoted to hosted status until their delivery and public-display conditions are resolved.
+The catalog contains a rights-aware roadmap for additional volatility, breadth, credit, rates and real-economy signals. Planned sources are not promoted to hosted status until their delivery and public-display conditions are resolved.
 
 ## What the dashboard shows
 
@@ -86,9 +87,9 @@ Opening `index.html` directly with a `file:` URL is not supported because browse
 
 ## Automatic public-data refresh
 
-The [Update public economic data workflow](https://github.com/Denis-Joly/eco-dashboard/actions/workflows/update-data.yml) runs at 16:30 UTC from Monday to Friday. That is 18:30 in Zurich during summer time and 17:30 during winter time. It validates the hosted-source publication status, refreshes the official OFR file, runs the complete test suite and commits only when the generated payload changes.
+The [Update public economic data workflow](https://github.com/Denis-Joly/eco-dashboard/actions/workflows/update-data.yml) runs at 22:30 UTC from Monday to Friday. That is 00:30 the next day in Zurich during summer time and 23:30 during winter time. This timing is after the Federal Reserve's 4:15 p.m. Eastern statistical releases in both seasons. The workflow validates source publication status, refreshes every official input, runs the complete test suite and commits only when the generated payload changes.
 
-This is a weekday refresh, not a promise that the displayed source date advances every calendar day. OFR publishes the Financial Stress Index with a two-business-day lag. GitHub also notes that [scheduled workflows can be delayed during periods of high load](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule). The badges at the top of this README show the latest workflow results.
+This is a weekday check, not a promise that every displayed source date advances daily. OFR has a two-business-day lag, H.10 updates weekly, and BLS indicators update monthly. GitHub also notes that [scheduled workflows can be delayed during periods of high load](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule). Each card shows its own observation date.
 
 The same updater can be run manually:
 
@@ -96,7 +97,7 @@ The same updater can be run manually:
 node scripts/update-data.mjs
 ```
 
-The updater downloads only the official OFR aggregate and category CSV, validates every required column, creates deterministic compact JSON and writes it atomically.
+The updater downloads the official OFR CSV, Federal Reserve H.15 and H.10 release archives, and keyless BLS API results. It validates the required series, calculates only documented transformations, creates deterministic compact JSON and writes it atomically. A local manual run needs the standard `unzip` command, which is already available on GitHub's Ubuntu runner.
 
 Run all checks with:
 
@@ -114,16 +115,16 @@ The dashboard uses midrank:
 100 × (observations below the latest value + 0.5 × equal observations) / N
 ```
 
-The headline percentile uses each hosted indicator's compatible full history. The chart controls recalculate the rank for the selected one-year, five-year or full-history view. A percentile is a historical rank, not a forecast probability.
+The headline percentile uses each hosted indicator's configured compatible history. CPI inflation and employment breadth begin in January 1991. The CPI baseline is deliberately limited to the modern inflation-policy era. The chart controls recalculate the rank for the selected one-year, five-year or full-history view. A percentile is a historical rank, not a forecast probability.
 
 Locally opened Cboe files accept `YYYY-MM-DD` or `MM/DD/YYYY` dates and reject the complete file if any data row is invalid. With one local indicator, its percentile uses the full validated file history. With several local indicators, every local value, statistic and percentile is recalculated over their shared overlapping date window. The dashboard never combines a newer external quote with an older local percentile history.
 
 ## Publication safeguards
 
 - Hosted live indicators must reference a catalog source marked as approved for public display.
-- Automated tests require the hosted JSON to contain only the five OFR series.
+- Automated tests require every hosted series to come from the explicit OFR, Federal Reserve or BLS allowlist.
 - Cboe indicators must remain catalog status `local` and absent from the hosted JSON.
-- Federal Reserve and derived indicators remain `planned` until an approved ingestion route is implemented.
+- FRED graph downloads and third-party market series are excluded from the hosted payload.
 - The Pages workflow assembles an explicit artifact containing only the files needed by the website.
 - The public branch should start from a clean root commit so restricted prototype data are not exposed through Git history.
 
@@ -131,7 +132,7 @@ Public availability of a file is not treated as a republication licence. The rig
 
 ## Deployment
 
-The GitHub Pages workflow runs the publication gate and all tests, assembles the static artifact and deploys it with GitHub's official Pages actions. The scheduled data workflow checks for new OFR data on weekdays and commits only when the generated payload changes.
+The GitHub Pages workflow runs the publication gate and all tests, assembles the static artifact and deploys it with GitHub's official Pages actions. The scheduled data workflow checks every public source on weekdays and commits only when the generated payload changes.
 
 ## Project structure
 
@@ -141,13 +142,13 @@ styles.css                             Responsive visual design
 app.js                                 Cards, network, regimes and canvas charts
 local-data.mjs                         Browser-only CSV validation and statistics
 data/catalog.json                      Indicator metadata, relationships and roadmap
-data/indices.json                      Generated public OFR dataset
-scripts/update-data.mjs                OFR ingestion and deterministic serialization
+data/indices.json                      Generated public economic dataset
+scripts/update-data.mjs                Multi-source ingestion and deterministic serialization
 scripts/check-publication-readiness.mjs Public-source rights gate
 test/local-data.test.mjs               Synthetic local-import tests
 test/update-data.test.mjs              Public pipeline tests
 test/catalog.test.mjs                  Catalog and publication-boundary tests
-.github/workflows/update-data.yml      Scheduled OFR refresh
+.github/workflows/update-data.yml      Scheduled public-data refresh
 .github/workflows/deploy-pages.yml     Tested GitHub Pages deployment
 ```
 
