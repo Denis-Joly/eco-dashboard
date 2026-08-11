@@ -17,7 +17,7 @@ export const OFR_SOURCE = Object.freeze({
     publicDisplayAllowed: true,
     rightsUrl: "https://www.financialresearch.gov/legal-notices/",
     attribution:
-      'Office of Financial Research, "OFR Financial Stress Index," refreshed daily, https://www.financialresearch.gov/financial-stress-index/.',
+      'Office of Financial Research, "OFR Financial Stress Index," https://www.financialresearch.gov/financial-stress-index/.',
     note:
       "OFR requests credit for federal-employee works and cautions that third-party materials can have separate restrictions. This dataset contains only OFR-published aggregate and category contributions.",
   },

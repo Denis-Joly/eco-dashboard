@@ -25,6 +25,24 @@ test("catalog references valid sections and sources", async () => {
   }
 });
 
+test("every current indicator has complete guide copy", async () => {
+  const [catalog, html] = await Promise.all([
+    readJson("data/catalog.json"),
+    readFile(new URL("index.html", projectUrl), "utf8"),
+  ]);
+  const currentIndicators = Object.entries(catalog.indicators)
+    .filter(([, indicator]) => ["live", "local"].includes(indicator.status));
+
+  assert.equal(currentIndicators.length, 9, "the guide should cover five public and four optional local indicators");
+  for (const [id, indicator] of currentIndicators) {
+    assert.match(indicator.description || "", /\S/, `${id} needs a plain-language definition`);
+    assert.match(indicator.howToRead || "", /\S/, `${id} needs interpretation guidance`);
+    assert.match(indicator.sourceUrl || "", /^https:\/\//, `${id} needs an official information link`);
+  }
+  assert.match(html, /id="indicator-guide"/, "the page needs a dedicated indicator guide");
+  assert.match(html, /id="history-definition"/, "the history panel needs the selected definition");
+});
+
 test("catalog relationships and regimes reference known indicators", async () => {
   const catalog = await readJson("data/catalog.json");
   const indicatorIds = new Set(Object.keys(catalog.indicators));

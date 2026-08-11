@@ -151,6 +151,8 @@ const ui = {
   statHigh: document.querySelector("#stat-high"),
   statCount: document.querySelector("#stat-count"),
   familyGrid: document.querySelector("#family-grid"),
+  indicatorGuideGroups: document.querySelector("#indicator-guide-groups"),
+  historyDefinition: document.querySelector("#history-definition"),
   networkStage: document.querySelector("#network-stage"),
   networkCanvas: document.querySelector("#network-canvas"),
   networkNodeLayer: document.querySelector("#network-node-layer"),
@@ -219,6 +221,7 @@ function metaFor(symbol) {
     changeLabel: catalogMeta?.unit?.changeLabel || "pts",
     showChangePercent: catalogMeta?.unit?.showChangePercent ?? fallback.showChangePercent ?? true,
     definition: catalogMeta?.description || fallback.definition || "",
+    howToRead: catalogMeta?.howToRead || "Read the latest value together with its historical percentile and connected signals.",
     frequency: catalogMeta?.frequency || "daily",
     observationLabel: catalogMeta?.observationLabel || "observations",
   };
@@ -653,6 +656,84 @@ function renderFamilies() {
   }
 }
 
+function guideConnections(symbol, allowedIds) {
+  const connections = new Map();
+  for (const relationship of state.catalog?.relationships || []) {
+    if (relationship.source !== symbol && relationship.target !== symbol) continue;
+    const otherId = relationship.source === symbol ? relationship.target : relationship.source;
+    if (!allowedIds.has(otherId) || connections.has(otherId)) continue;
+    connections.set(otherId, relationship);
+  }
+  return [...connections.entries()].slice(0, 4);
+}
+
+function renderIndicatorGuide() {
+  if (!ui.indicatorGuideGroups || !state.catalog?.indicators || !state.catalog?.sections) return;
+  const guideEntries = Object.entries(state.catalog.indicators)
+    .filter(([, indicator]) => ["live", "local"].includes(indicator.status));
+  const allowedIds = new Set(guideEntries.map(([id]) => id));
+  const sections = [...state.catalog.sections].sort((left, right) => left.order - right.order);
+  ui.indicatorGuideGroups.replaceChildren();
+
+  for (const section of sections) {
+    const members = guideEntries
+      .filter(([, indicator]) => indicator.sectionId === section.id)
+      .sort(([, left], [, right]) => (left.displayOrder || 999) - (right.displayOrder || 999));
+    if (!members.length) continue;
+
+    const group = document.createElement("article");
+    group.className = "indicator-guide-family";
+    group.style.setProperty("--guide-color", section.color);
+    const cards = members.map(([id, indicator]) => {
+      const meta = metaFor(id);
+      const localActive = indicator.status === "local" && Boolean(state.data?.indices[id]);
+      const statusLabel = indicator.status === "live"
+        ? "Public data"
+        : localActive
+          ? "Local CSV active"
+          : "Optional local CSV";
+      const statusClass = indicator.status === "live" ? "public" : localActive ? "active" : "local";
+      const connections = guideConnections(id, allowedIds);
+      const connectionMarkup = connections.length
+        ? `<div class="indicator-guide-context">
+            <span>Read with</span>
+            <div>${connections.map(([otherId, relationship]) =>
+              `<a href="#relationships"><strong>${metaFor(otherId).ticker}</strong>${relationship.label}</a>`).join("")}</div>
+          </div>`
+        : "";
+      const sourceLabel = indicator.status === "live" ? "Official source" : "Product information";
+
+      return `<details class="indicator-guide-card">
+        <summary>
+          <span class="indicator-guide-symbol">${meta.ticker}</span>
+          <span class="indicator-guide-name"><strong>${meta.cardName}</strong><small>${meta.role}</small></span>
+          <span class="indicator-guide-status ${statusClass}">${statusLabel}</span>
+        </summary>
+        <div class="indicator-guide-body">
+          <div>
+            <span>What it measures</span>
+            <p>${meta.definition}</p>
+          </div>
+          <div>
+            <span>How to read it</span>
+            <p>${meta.howToRead}</p>
+          </div>
+          ${connectionMarkup}
+          <a class="indicator-guide-source" href="${meta.sourceUrl}" target="_blank" rel="noopener noreferrer">${sourceLabel} ↗</a>
+        </div>
+      </details>`;
+    }).join("");
+
+    group.innerHTML = `
+      <header>
+        <span class="indicator-guide-dot" aria-hidden="true"></span>
+        <div><h3>${section.title}</h3><p>${section.description}</p></div>
+      </header>
+      <div class="indicator-guide-cards">${cards}</div>`;
+    ui.indicatorGuideGroups.append(group);
+  }
+}
+
 function visibleNetworkIds() {
   const configured = liveIndicatorIds().filter((id) =>
     state.data.indices[id] && state.catalog?.indicators?.[id]?.network?.visible,
@@ -854,6 +935,7 @@ function renderDetail() {
   const distribution = calculateDistribution(state.visibleHistory);
 
   ui.historyTitle.textContent = `${meta.ticker} · ${meta.name}`;
+  ui.historyDefinition.textContent = `${meta.definition} ${meta.howToRead}`;
   ui.historyFrequencyLabel.textContent = `Historical ${meta.observationLabel}`;
   ui.indexSourceLink.href = meta.sourceUrl || item.sourceUrl || state.data.source?.url || "https://www.financialresearch.gov/financial-stress-index/";
   ui.indexSourceLink.textContent = item.dataOrigin === "local-session" ? "Product information ↗" : "Official source ↗";
@@ -1190,6 +1272,7 @@ function renderDashboard() {
   renderCards();
   renderIndexPicker();
   renderFamilies();
+  renderIndicatorGuide();
   renderNetwork();
   renderDetail();
 }

@@ -30,8 +30,8 @@
     />
     <meta name="twitter:image" content="https://denis-joly.github.io/eco-dashboard/public/og.png" />
     <title>Market Surface: Economic &amp; Market Regime Dashboard</title>
-    <link rel="stylesheet" href="styles.css?v=20260810c" />
-    <script type="module" src="app.js?v=20260810c"></script>
+    <link rel="stylesheet" href="styles.css?v=20260811a" />
+    <script type="module" src="app.js?v=20260811a"></script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to dashboard</a>
@@ -77,7 +77,7 @@
         <div class="data-access-grid">
           <div class="data-access-copy">
             <p class="eyebrow">Your private options layer</p>
-            <h2 id="private-layer-title">Add VIX-family analysis without publishing the data</h2>
+            <h2 id="private-layer-title">Add Cboe market analysis without publishing the data</h2>
             <p>
               The hosted dashboard uses public OFR observations. If you have obtained VIX, VIXEQ, DSPX or COR1M
               CSV files for your own permitted use, you can open them locally to add their histories, percentiles
@@ -144,6 +144,25 @@
           <div class="metric-skeleton"></div>
           <div class="metric-skeleton"></div>
         </div>
+      </section>
+
+      <section class="indicator-guide section-shell" id="indicator-guide" aria-labelledby="indicator-guide-title">
+        <div class="section-heading indicator-guide-heading">
+          <div>
+            <p class="eyebrow">Indicator guide</p>
+            <h2 id="indicator-guide-title">What each signal tells you</h2>
+          </div>
+          <p class="section-note">
+            Each indicator answers a different question. Open a card to see what it measures, how to read it and
+            which other signals give it context.
+          </p>
+        </div>
+        <p class="indicator-guide-note">
+          OFR category readings are signed contributions: positive values add to aggregate stress and negative
+          values offset it. The Safe assets contribution is not displayed, so the visible categories are a partial
+          decomposition of the aggregate index.
+        </p>
+        <div class="indicator-guide-groups" id="indicator-guide-groups"></div>
       </section>
 
       <section class="relationships section-shell" id="relationships" aria-labelledby="relationships-title">
@@ -232,6 +251,7 @@
               <div>
                 <p class="panel-label" id="history-frequency-label">Historical observations</p>
                 <h3 id="history-title">Loading history…</h3>
+                <p class="history-definition" id="history-definition">Loading indicator definition.</p>
               </div>
               <div class="segmented-control range-control" id="range-picker" role="group" aria-label="Choose a time range">
                 <button type="button" data-range="1Y">1Y</button>
@@ -339,7 +359,7 @@
             comparison window. Optional Cboe files are processed only in the current browser session.
           </p>
           <p class="source-credit">
-            Source: Office of Financial Research, <a href="https://www.financialresearch.gov/financial-stress-index/" target="_blank" rel="noopener noreferrer">OFR Financial Stress Index</a>, refreshed daily.
+            Source: Office of Financial Research, <a href="https://www.financialresearch.gov/financial-stress-index/" target="_blank" rel="noopener noreferrer">OFR Financial Stress Index</a>. Checked each weekday; the source is published with a two-business-day lag.
           </p>
         </div>
         <div class="methodology-details">
