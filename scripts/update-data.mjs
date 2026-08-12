@@ -23,6 +23,26 @@ export const FED_H10_DATA_URL =
   "https://www.federalreserve.gov/releases/h10/data/FRB_h10_xml.zip";
 export const BLS_API_URL =
   "https://api.bls.gov/publicAPI/v1/timeseries/data/";
+export const CFTC_TFF_FUTURES_ONLY_DATASET_ID = "gpe5-46if";
+export const CFTC_E_MINI_SP500_CONTRACT_CODE = "13874A";
+export const CFTC_E_MINI_SP500_FIRST_REPORT_DATE = "2006-06-13";
+export const CFTC_E_MINI_SP500_MINIMUM_HISTORY = 1000;
+export const CFTC_API_URL =
+  `https://publicreporting.cftc.gov/resource/${CFTC_TFF_FUTURES_ONLY_DATASET_ID}.json`;
+const CFTC_SELECT_FIELDS = [
+  "report_date_as_yyyy_mm_dd",
+  "cftc_contract_market_code",
+  "market_and_exchange_names",
+  "contract_units",
+  "open_interest_all",
+  "lev_money_positions_long",
+  "lev_money_positions_short",
+  "lev_money_positions_spread",
+].join(",");
+export const CFTC_DATA_URL =
+  `${CFTC_API_URL}?$select=${CFTC_SELECT_FIELDS}` +
+  `&$where=cftc_contract_market_code%3D%27${CFTC_E_MINI_SP500_CONTRACT_CODE}%27` +
+  "&$order=report_date_as_yyyy_mm_dd%20ASC&$limit=50000";
 
 export const OFR_SOURCE = Object.freeze({
   id: "ofr",
@@ -71,6 +91,24 @@ export const BLS_SOURCE = Object.freeze({
   },
 });
 
+export const CFTC_SOURCE = Object.freeze({
+  id: "cftc",
+  name: "U.S. Commodity Futures Trading Commission",
+  url: `https://publicreportinghub.cftc.gov/Commitments-of-Traders/TFF-Futures-Only/${CFTC_TFF_FUTURES_ONLY_DATASET_ID}`,
+  dataUrl: CFTC_DATA_URL,
+  datasetId: CFTC_TFF_FUTURES_ONLY_DATASET_ID,
+  contractCode: CFTC_E_MINI_SP500_CONTRACT_CODE,
+  rights: {
+    status: "us-federal-government-public-domain-credit-requested",
+    publicDisplayAllowed: true,
+    rightsUrl: "https://www.cftc.gov/WebPolicy/index.htm",
+    attribution:
+      "Source: U.S. Commodity Futures Trading Commission, Commitments of Traders, Traders in Financial Futures, Futures Only, contract 13874A. Derived calculation by Market Surface.",
+    note:
+      "The CFTC states that government information on its website is in the public domain and requests appropriate acknowledgement. The hosted series contains CFTC-published futures positions and a documented dashboard calculation. It does not contain S&P 500 index levels or exchange-provided market-price data.",
+  },
+});
+
 const OFR_SERIES_CONFIG = Object.freeze({
   OFRFSI: {
     column: "OFR FSI",
@@ -78,6 +116,7 @@ const OFR_SERIES_CONFIG = Object.freeze({
     ticker: "OFR FSI",
     unit: "index points",
     valueType: "published daily index level",
+    sourceRef: OFR_SOURCE.id,
   },
   OFRVOL: {
     column: "Volatility",
@@ -85,6 +124,7 @@ const OFR_SERIES_CONFIG = Object.freeze({
     ticker: "OFR VOL",
     unit: "stress contribution",
     valueType: "published daily category contribution",
+    sourceRef: OFR_SOURCE.id,
   },
   OFREQUITY: {
     column: "Equity valuation",
@@ -92,6 +132,7 @@ const OFR_SERIES_CONFIG = Object.freeze({
     ticker: "OFR EQUITY",
     unit: "stress contribution",
     valueType: "published daily category contribution",
+    sourceRef: OFR_SOURCE.id,
   },
   OFRSAFE: {
     column: "Safe assets",
@@ -99,6 +140,7 @@ const OFR_SERIES_CONFIG = Object.freeze({
     ticker: "OFR SAFE",
     unit: "stress contribution",
     valueType: "published daily category contribution",
+    sourceRef: OFR_SOURCE.id,
   },
   OFRCREDIT: {
     column: "Credit",
@@ -106,6 +148,7 @@ const OFR_SERIES_CONFIG = Object.freeze({
     ticker: "OFR CREDIT",
     unit: "stress contribution",
     valueType: "published daily category contribution",
+    sourceRef: OFR_SOURCE.id,
   },
   OFRFUNDING: {
     column: "Funding",
@@ -113,11 +156,36 @@ const OFR_SERIES_CONFIG = Object.freeze({
     ticker: "OFR FUNDING",
     unit: "stress contribution",
     valueType: "published daily category contribution",
+    sourceRef: OFR_SOURCE.id,
   },
 });
 
 export const SERIES_CONFIG = Object.freeze({
   ...OFR_SERIES_CONFIG,
+  DGS2: {
+    name: "2-Year Treasury Constant Maturity Rate",
+    ticker: "DGS2",
+    unit: "percent",
+    valueType: "published daily nominal yield",
+    sourceRef: FED_SOURCE.id,
+    provenance: {
+      release: "H.15 Selected Interest Rates",
+      sourceSeries: ["RIFLGFCY02_N.B"],
+      transformation: "identity",
+    },
+  },
+  DGS10: {
+    name: "10-Year Treasury Constant Maturity Rate",
+    ticker: "DGS10",
+    unit: "percent",
+    valueType: "published daily nominal yield",
+    sourceRef: FED_SOURCE.id,
+    provenance: {
+      release: "H.15 Selected Interest Rates",
+      sourceSeries: ["RIFLGFCY10_N.B"],
+      transformation: "identity",
+    },
+  },
   CURVE2S10S: {
     name: "10-Year minus 2-Year Treasury spread",
     ticker: "10Y-2Y",
@@ -126,7 +194,12 @@ export const SERIES_CONFIG = Object.freeze({
     sourceRef: FED_SOURCE.id,
     calculation: {
       formula: "100 x (10-year Treasury yield - 2-year Treasury yield)",
-      inputs: ["RIFLGFCY10_N.B", "RIFLGFCY02_N.B"],
+      inputs: ["DGS10", "DGS2"],
+    },
+    provenance: {
+      release: "H.15 Selected Interest Rates",
+      sourceSeries: ["RIFLGFCY10_N.B", "RIFLGFCY02_N.B"],
+      transformation: "same-date spread",
     },
   },
   REAL10Y: {
@@ -135,6 +208,48 @@ export const SERIES_CONFIG = Object.freeze({
     unit: "percent",
     valueType: "published daily real yield",
     sourceRef: FED_SOURCE.id,
+    provenance: {
+      release: "H.15 Selected Interest Rates",
+      sourceSeries: ["RIFLGFCY10_XII_N.B"],
+      transformation: "identity",
+    },
+  },
+  RATEVOL20: {
+    name: "20-Observation Realized 10-Year Treasury Yield Volatility",
+    ticker: "RATE VOL 20",
+    unit: "basis points per day",
+    valueType: "dashboard-calculated daily realized rate volatility",
+    sourceRef: FED_SOURCE.id,
+    calculation: {
+      formula:
+        "Non-annualized sample standard deviation of the latest 20 valid daily DGS10 changes, measured in basis points",
+      inputs: ["DGS10"],
+      windowObservations: 20,
+      annualized: false,
+    },
+    provenance: {
+      release: "H.15 Selected Interest Rates",
+      sourceSeries: ["RIFLGFCY10_N.B"],
+      transformation: "rolling sample standard deviation",
+    },
+  },
+  INFLATIONCOMP10Y: {
+    name: "10-Year nominal-real yield gap",
+    ticker: "10Y INFL COMP",
+    unit: "percentage points",
+    valueType: "dashboard-calculated daily inflation-compensation proxy",
+    sourceRef: FED_SOURCE.id,
+    calculation: {
+      formula: "DGS10 - REAL10Y on matching dates",
+      inputs: ["DGS10", "REAL10Y"],
+      note:
+        "This is an inflation-compensation proxy, not a pure inflation forecast; it can also reflect inflation-risk and liquidity premia.",
+    },
+    provenance: {
+      release: "H.15 Selected Interest Rates",
+      sourceSeries: ["RIFLGFCY10_N.B", "RIFLGFCY10_XII_N.B"],
+      transformation: "same-date nominal-real yield difference",
+    },
   },
   CPIYOY: {
     name: "Consumer Price Index 12-month change",
@@ -160,6 +275,34 @@ export const SERIES_CONFIG = Object.freeze({
     unit: "index points",
     valueType: "published daily index level",
     sourceRef: FED_SOURCE.id,
+  },
+  LEVSPNET: {
+    name: "Leveraged Funds Net E-mini S&P 500 Positioning",
+    ticker: "LEV S&P NET",
+    unit: "percent of open interest",
+    valueType: "dashboard-calculated weekly net futures positioning",
+    sourceRef: CFTC_SOURCE.id,
+    calculation: {
+      formula:
+        "100 x (leveraged funds long positions - leveraged funds short positions) / total open interest",
+      inputs: [
+        "lev_money_positions_long",
+        "lev_money_positions_short",
+        "open_interest_all",
+      ],
+      note:
+        "Spreading positions are excluded from the directional numerator. A net short value is a positioning measure, not a standalone equity-market forecast. CFTC notes that pre-publication history was backcast using later trader classifications and becomes less accurate farther back.",
+    },
+    provenance: {
+      report: "Traders in Financial Futures, Futures Only",
+      datasetId: CFTC_TFF_FUTURES_ONLY_DATASET_ID,
+      contractCode: CFTC_E_MINI_SP500_CONTRACT_CODE,
+      observationTiming:
+        "CFTC report date, normally Tuesday and sometimes holiday-adjusted",
+      usualPublicationTiming: "Friday at 3:30 p.m. Eastern time",
+      transformation: "directional leveraged-funds net divided by total open interest",
+      retrievalMode: "complete-history-refetch",
+    },
   },
 });
 
@@ -228,7 +371,7 @@ function round(value, digits = 4) {
   return Object.is(rounded, -0) ? 0 : rounded;
 }
 
-function normalizeObservations(observations, id) {
+function normalizeObservations(observations, id, minimumObservations = 2) {
   const observationsByDate = new Map();
   for (const observation of observations || []) {
     const date = toIsoDate(observation?.date);
@@ -241,7 +384,14 @@ function normalizeObservations(observations, id) {
   const normalized = [...observationsByDate]
     .sort(([left], [right]) => left.localeCompare(right))
     .map(([date, value]) => ({ date, value }));
-  if (normalized.length < 2) throw new Error(`${id} has fewer than two observations`);
+  if (normalized.length < minimumObservations) {
+    if (minimumObservations === 2) {
+      throw new Error(`${id} has fewer than two observations`);
+    }
+    throw new Error(
+      `${id} has fewer than ${minimumObservations} observation${minimumObservations === 1 ? "" : "s"}`,
+    );
+  }
   return normalized;
 }
 
@@ -364,6 +514,115 @@ export function parseBlsResponse(payload, requestedSeriesIds = BLS_INPUT_SERIES)
   return observationsById;
 }
 
+function parseCftcNumericField(row, fieldName) {
+  const rawValue = row?.[fieldName];
+  if (typeof rawValue !== "string" && typeof rawValue !== "number") {
+    throw new Error(`CFTC ${fieldName} is missing or is not numeric`);
+  }
+  const normalized = String(rawValue).trim().replaceAll(",", "");
+  if (!normalized) throw new Error(`CFTC ${fieldName} is blank`);
+  const value = Number(normalized);
+  if (!Number.isFinite(value)) {
+    throw new Error(`CFTC ${fieldName} is not a finite number`);
+  }
+  return value;
+}
+
+export function parseCftcTffFuturesOnly(payload) {
+  if (!Array.isArray(payload)) {
+    throw new Error("CFTC TFF Futures Only response must be an array");
+  }
+
+  const rowsByDate = new Map();
+  for (const row of payload) {
+    if (
+      row?.cftc_contract_market_code !== CFTC_E_MINI_SP500_CONTRACT_CODE
+    ) {
+      throw new Error(
+        `CFTC response contains a contract other than ${CFTC_E_MINI_SP500_CONTRACT_CODE}`,
+      );
+    }
+
+    const rawDate =
+      typeof row.report_date_as_yyyy_mm_dd === "string"
+        ? row.report_date_as_yyyy_mm_dd.trim()
+        : "";
+    const date = toIsoDate(rawDate.slice(0, 10));
+    if (!date) throw new Error("CFTC response contains an invalid report date");
+
+    const openInterest = parseCftcNumericField(row, "open_interest_all");
+    const leveragedLong = parseCftcNumericField(
+      row,
+      "lev_money_positions_long",
+    );
+    const leveragedShort = parseCftcNumericField(
+      row,
+      "lev_money_positions_short",
+    );
+    const leveragedSpread = parseCftcNumericField(
+      row,
+      "lev_money_positions_spread",
+    );
+    if (openInterest <= 0) {
+      throw new Error("CFTC open_interest_all must be positive");
+    }
+    if (leveragedLong < 0 || leveragedShort < 0 || leveragedSpread < 0) {
+      throw new Error("CFTC position fields must be non-negative");
+    }
+
+    if (rowsByDate.has(date)) {
+      throw new Error(`CFTC response contains a duplicate report date: ${date}`);
+    }
+    rowsByDate.set(date, {
+      date,
+      contractCode: CFTC_E_MINI_SP500_CONTRACT_CODE,
+      openInterest,
+      leveragedLong,
+      leveragedShort,
+      leveragedSpread,
+    });
+  }
+
+  const rows = [...rowsByDate.values()].sort((left, right) =>
+    left.date.localeCompare(right.date),
+  );
+  if (rows.length < CFTC_E_MINI_SP500_MINIMUM_HISTORY) {
+    throw new Error(
+      `CFTC TFF Futures Only response has fewer than ${CFTC_E_MINI_SP500_MINIMUM_HISTORY} observations`,
+    );
+  }
+  if (rows[0].date !== CFTC_E_MINI_SP500_FIRST_REPORT_DATE) {
+    throw new Error(
+      `CFTC TFF Futures Only history must begin on ${CFTC_E_MINI_SP500_FIRST_REPORT_DATE}`,
+    );
+  }
+  return rows;
+}
+
+export function deriveLeveragedSp500Net(cftcRows) {
+  const observations = (cftcRows || []).map((row) => {
+    if (row?.contractCode !== CFTC_E_MINI_SP500_CONTRACT_CODE) {
+      throw new Error(
+        `LEVSPNET requires CFTC contract ${CFTC_E_MINI_SP500_CONTRACT_CODE}`,
+      );
+    }
+    const { date, openInterest, leveragedLong, leveragedShort } = row;
+    if (
+      !Number.isFinite(openInterest) ||
+      openInterest <= 0 ||
+      !Number.isFinite(leveragedLong) ||
+      !Number.isFinite(leveragedShort)
+    ) {
+      throw new Error("LEVSPNET contains invalid CFTC position inputs");
+    }
+    return {
+      date,
+      value: round((100 * (leveragedLong - leveragedShort)) / openInterest),
+    };
+  });
+  return normalizeObservations(observations, "LEVSPNET");
+}
+
 export function mergeObservationSeries(parts, ids) {
   return Object.fromEntries(
     ids.map((id) => {
@@ -399,6 +658,73 @@ export function deriveCurveSpread(twoYear, tenYear) {
       : [];
   });
   return normalizeObservations(spread, "CURVE2S10S");
+}
+
+export function deriveRateVolatility20(tenYear) {
+  const windowChanges = 20;
+  const yields = normalizeObservations(tenYear, "DGS10");
+  if (yields.length < windowChanges + 1) {
+    throw new Error(
+      `RATEVOL20 requires at least ${windowChanges + 1} valid DGS10 yield observations`,
+    );
+  }
+
+  const dailyChanges = yields.slice(1).map(({ date, value }, index) => ({
+    date,
+    value: 100 * (value - yields[index].value),
+  }));
+  const volatility = [];
+  for (let end = windowChanges; end <= dailyChanges.length; end += 1) {
+    const changes = dailyChanges.slice(end - windowChanges, end);
+    const mean = changes.reduce((sum, observation) => sum + observation.value, 0) /
+      windowChanges;
+    const squaredDeviations = changes.reduce(
+      (sum, observation) => sum + (observation.value - mean) ** 2,
+      0,
+    );
+    volatility.push({
+      date: changes.at(-1).date,
+      value: round(Math.sqrt(squaredDeviations / (windowChanges - 1))),
+    });
+  }
+
+  return normalizeObservations(volatility, "RATEVOL20", 1);
+}
+
+export function deriveInflationCompensation10Y(tenYear, realTenYear) {
+  const realYieldByDate = new Map(
+    realTenYear.map(({ date, value }) => [date, value]),
+  );
+  const compensation = tenYear.flatMap(({ date, value }) => {
+    const realYield = realYieldByDate.get(date);
+    return Number.isFinite(realYield)
+      ? [{ date, value: round(value - realYield) }]
+      : [];
+  });
+  return normalizeObservations(compensation, "INFLATIONCOMP10Y");
+}
+
+export function buildTreasurySeries(h15Series) {
+  const twoYear = normalizeObservations(
+    h15Series?.["RIFLGFCY02_N.B"],
+    "DGS2",
+  );
+  const tenYear = normalizeObservations(
+    h15Series?.["RIFLGFCY10_N.B"],
+    "DGS10",
+  );
+  const realTenYear = normalizeObservations(
+    h15Series?.["RIFLGFCY10_XII_N.B"],
+    "REAL10Y",
+  );
+  return {
+    DGS2: twoYear,
+    DGS10: tenYear,
+    CURVE2S10S: deriveCurveSpread(twoYear, tenYear),
+    REAL10Y: realTenYear,
+    RATEVOL20: deriveRateVolatility20(tenYear),
+    INFLATIONCOMP10Y: deriveInflationCompensation10Y(tenYear, realTenYear),
+  };
 }
 
 export function deriveYearOverYear(monthlyIndex, startDate = PUBLIC_HISTORY_START) {
@@ -449,10 +775,19 @@ export function midrankPercentile(values, target) {
   return round((100 * (below + 0.5 * equal)) / values.length, 2);
 }
 
-function sourceFor(config) {
-  if (config.sourceRef === FED_SOURCE.id) return FED_SOURCE;
-  if (config.sourceRef === BLS_SOURCE.id) return BLS_SOURCE;
-  return OFR_SOURCE;
+const SOURCE_REGISTRY = Object.freeze({
+  [OFR_SOURCE.id]: OFR_SOURCE,
+  [FED_SOURCE.id]: FED_SOURCE,
+  [BLS_SOURCE.id]: BLS_SOURCE,
+  [CFTC_SOURCE.id]: CFTC_SOURCE,
+});
+
+export function sourceFor(config) {
+  const source = SOURCE_REGISTRY[config?.sourceRef];
+  if (!source) {
+    throw new Error(`Unknown source reference: ${config?.sourceRef ?? "(missing)"}`);
+  }
+  return source;
 }
 
 export function buildDashboardData(seriesById, metadata = {}) {
@@ -493,6 +828,9 @@ export function buildDashboardData(seriesById, metadata = {}) {
       sourceRef: source.id,
       sourceUrl: source.url,
       ...(config.calculation ? { calculation: config.calculation } : {}),
+      ...(config.provenance
+        ? { provenance: { sourceRef: source.id, ...config.provenance } }
+        : {}),
       latest: {
         date: latest.date,
         value: latest.value,
@@ -513,11 +851,7 @@ export function buildDashboardData(seriesById, metadata = {}) {
     };
   }
 
-  const sources = {
-    [OFR_SOURCE.id]: OFR_SOURCE,
-    [FED_SOURCE.id]: FED_SOURCE,
-    [BLS_SOURCE.id]: BLS_SOURCE,
-  };
+  const sources = SOURCE_REGISTRY;
   return {
     schemaVersion: 1,
     generatedAt: `${allLatestDates.at(-1)}T00:00:00.000Z`,
@@ -529,7 +863,7 @@ export function buildDashboardData(seriesById, metadata = {}) {
         (source) => source.rights.publicDisplayAllowed,
       ),
       policy:
-        "Hosted data contains only public OFR, Federal Reserve Board, and BLS observations, plus documented dashboard calculations from those observations.",
+        "Hosted data contains only public OFR, Federal Reserve Board, BLS, and CFTC observations, plus documented dashboard calculations from those observations.",
       sources: Object.fromEntries(
         Object.entries(sources).map(([id, source]) => [id, source.rights]),
       ),
@@ -589,6 +923,13 @@ async function fetchText(url) {
   return response.text();
 }
 
+async function fetchJson(url) {
+  const response = await fetchWithRetry(url, {
+    headers: { accept: "application/json" },
+  });
+  return response.json();
+}
+
 async function fetchBuffer(url) {
   const response = await fetchWithRetry(url);
   const buffer = Buffer.from(await response.arrayBuffer());
@@ -635,11 +976,12 @@ export async function updateData(outputPath = path.resolve("data/indices.json"))
     path.join(tmpdir(), "eco-dashboard-public-data-"),
   );
   try {
-    const [ofrCsv, h15Zip, h10Zip, blsInputs] = await Promise.all([
+    const [ofrCsv, h15Zip, h10Zip, blsInputs, cftcPayload] = await Promise.all([
       fetchText(OFR_DATA_URL),
       fetchBuffer(FED_H15_DATA_URL),
       fetchBuffer(FED_H10_DATA_URL),
       fetchBlsHistory(currentYear),
+      fetchJson(CFTC_DATA_URL),
     ]);
     const h15Xml = await unzipXml(
       h15Zip,
@@ -656,16 +998,15 @@ export async function updateData(outputPath = path.resolve("data/indices.json"))
     const ofr = parseOfrCsv(ofrCsv);
     const seriesById = {
       ...ofr,
-      CURVE2S10S: deriveCurveSpread(
-        h15["RIFLGFCY02_N.B"],
-        h15["RIFLGFCY10_N.B"],
-      ),
-      REAL10Y: h15["RIFLGFCY10_XII_N.B"],
+      ...buildTreasurySeries(h15),
       CPIYOY: deriveYearOverYear(blsInputs.CUUR0000SA0),
       EMPDIFF1M: blsInputs.CES0500000021.filter(
         ({ date }) => date >= PUBLIC_HISTORY_START,
       ),
       DTWEXBGS: h10["JRXWTFB_N.B"],
+      LEVSPNET: deriveLeveragedSp500Net(
+        parseCftcTffFuturesOnly(cftcPayload),
+      ),
     };
     const dashboardData = buildDashboardData(seriesById, {
       retrievedAt: new Date().toISOString().slice(0, 10),

@@ -11,11 +11,16 @@ const CORE_INDICATORS = [
   "OFRSAFE",
   "OFRCREDIT",
   "OFRFUNDING",
+  "DGS2",
+  "DGS10",
   "CURVE2S10S",
+  "RATEVOL20",
   "REAL10Y",
+  "INFLATIONCOMP10Y",
   "CPIYOY",
   "EMPDIFF1M",
   "DTWEXBGS",
+  "LEVSPNET",
 ];
 const LOCAL_INDICATORS = new Set(["VIX", "VIXEQ", "DSPX", "COR1M"]);
 
@@ -90,6 +95,36 @@ const FALLBACK_META = {
     showChangePercent: false,
     definition: "The same-date difference between 10-year and 2-year Treasury yields",
   },
+  DGS2: {
+    ticker: "2Y",
+    name: "2-Year Treasury Constant Maturity Rate",
+    cardName: "Two-year Treasury yield",
+    role: "Policy-sensitive yield",
+    color: "#c9a9ff",
+    unitLabel: "Percent",
+    showChangePercent: false,
+    definition: "The Federal Reserve's daily two-year Treasury constant-maturity yield",
+  },
+  DGS10: {
+    ticker: "10Y",
+    name: "10-Year Treasury Constant Maturity Rate",
+    cardName: "Ten-year Treasury yield",
+    role: "Long nominal yield",
+    color: "#c9a9ff",
+    unitLabel: "Percent",
+    showChangePercent: false,
+    definition: "The Federal Reserve's daily ten-year Treasury constant-maturity yield",
+  },
+  RATEVOL20: {
+    ticker: "RATE VOL 20",
+    name: "20-Observation Realized 10-Year Treasury Yield Volatility",
+    cardName: "Treasury rate volatility",
+    role: "Realized bond-market instability",
+    color: "#c9a9ff",
+    unitLabel: "Basis points per day",
+    showChangePercent: false,
+    definition: "The sample volatility of the latest 20 daily changes in the 10-year Treasury yield",
+  },
   REAL10Y: {
     ticker: "REAL 10Y",
     name: "10-Year Treasury inflation-indexed yield",
@@ -110,6 +145,16 @@ const FALLBACK_META = {
     showChangePercent: false,
     definition: "The 12-month percentage change in the headline Consumer Price Index",
   },
+  INFLATIONCOMP10Y: {
+    ticker: "10Y INFL COMP",
+    name: "10-Year nominal-real yield gap",
+    cardName: "Ten-year inflation compensation",
+    role: "Bond-market inflation compensation",
+    color: "#c9a9ff",
+    unitLabel: "Percentage points",
+    showChangePercent: false,
+    definition: "The same-date gap between nominal and real ten-year Treasury yields",
+  },
   EMPDIFF1M: {
     ticker: "JOBS BREADTH",
     name: "Private employment diffusion index",
@@ -129,6 +174,16 @@ const FALLBACK_META = {
     unitLabel: "Index points",
     showChangePercent: false,
     definition: "The trade-weighted value of the U.S. dollar against a broad group of currencies",
+  },
+  LEVSPNET: {
+    ticker: "LEV S&P NET",
+    name: "Leveraged funds net E-mini S&P 500 positioning",
+    cardName: "Leveraged equity positioning",
+    role: "Equity futures positioning",
+    color: "#77bdfb",
+    unitLabel: "Percent of open interest",
+    showChangePercent: false,
+    definition: "Leveraged funds' directional net E-mini S&P 500 futures position as a share of total open interest",
   },
   VIX: {
     ticker: "VIX",
@@ -184,6 +239,7 @@ const state = {
   lineChartModel: null,
   inspectedIndex: null,
   activeRegime: null,
+  networkView: "overview",
   networkSymbol: "OFRFSI",
 };
 
@@ -197,6 +253,9 @@ const ui = {
   ofrBreakdown: document.querySelector("#ofr-breakdown"),
   ofrBreakdownList: document.querySelector("#ofr-breakdown-list"),
   ofrBreakdownDate: document.querySelector("#ofr-breakdown-date"),
+  treasuryBreakdown: document.querySelector("#treasury-breakdown"),
+  treasuryBreakdownList: document.querySelector("#treasury-breakdown-list"),
+  treasuryBreakdownDate: document.querySelector("#treasury-breakdown-date"),
   regimeTitle: document.querySelector("#regime-title"),
   regimeCopy: document.querySelector("#regime-copy"),
   regimeAsOf: document.querySelector("#regime-as-of"),
@@ -228,6 +287,8 @@ const ui = {
   historyDefinition: document.querySelector("#history-definition"),
   networkStage: document.querySelector("#network-stage"),
   networkCanvas: document.querySelector("#network-canvas"),
+  networkViewPicker: document.querySelector("#network-view-picker"),
+  networkViewDescription: document.querySelector("#network-view-description"),
   networkNodeLayer: document.querySelector("#network-node-layer"),
   networkDetailTicker: document.querySelector("#network-detail-ticker"),
   networkDetailBand: document.querySelector("#network-detail-band"),
@@ -511,7 +572,7 @@ function renderFreshness() {
   if (ui.sourceRetrievalDate) {
     const retrievalDate = String(state.data.retrievedAt || "").slice(0, 10);
     ui.sourceRetrievalDate.textContent = parseDate(retrievalDate)
-      ? ` BLS data retrieved ${formatDate(retrievalDate, { short: true })}.`
+      ? ` Official source data retrieved ${formatDate(retrievalDate, { short: true })}.`
       : "";
   }
 }
@@ -572,9 +633,33 @@ function createMetricCard(symbol, item) {
 function renderCards() {
   ui.metricGrid.replaceChildren();
   const pinnedIds = pinnedIndicatorIds();
-  for (const symbol of pinnedIds) {
-    const item = state.data.indices[symbol];
-    if (item) ui.metricGrid.append(createMetricCard(symbol, item));
+  const sections = [...(state.catalog?.sections || [])].sort(
+    (left, right) => (left.order || 999) - (right.order || 999),
+  );
+  for (const section of sections) {
+    const sectionIds = pinnedIds.filter(
+      (symbol) => state.catalog.indicators[symbol]?.sectionId === section.id,
+    );
+    if (!sectionIds.length) continue;
+    const group = document.createElement("section");
+    group.className = "metric-family-group";
+    group.setAttribute("aria-labelledby", `snapshot-family-${section.id}`);
+    const heading = document.createElement("header");
+    heading.className = "metric-family-heading";
+    heading.innerHTML = `
+      <span class="metric-family-dot" style="--family-color:${section.color}" aria-hidden="true"></span>
+      <div>
+        <h3 id="snapshot-family-${section.id}">${section.title}</h3>
+        <p>${section.description}</p>
+      </div>`;
+    const cards = document.createElement("div");
+    cards.className = "metric-family-cards";
+    for (const symbol of sectionIds) {
+      const item = state.data.indices[symbol];
+      if (item) cards.append(createMetricCard(symbol, item));
+    }
+    group.append(heading, cards);
+    ui.metricGrid.append(group);
   }
   ui.metricGridStatus.textContent = `${pinnedIds.length} pinned indicators shown.`;
 }
@@ -620,6 +705,38 @@ function renderOfrBreakdown() {
       <button type="button" data-symbol="${symbol}" aria-label="Open ${meta.name} history">View history</button>`;
     row.querySelector("button").addEventListener("click", () => selectIndex(symbol, true));
     ui.ofrBreakdownList.append(row);
+  }
+}
+
+function renderTreasuryBreakdown() {
+  if (!ui.treasuryBreakdown || !ui.treasuryBreakdownList) return;
+  const inputIds = state.catalog?.indicators?.CURVE2S10S?.componentIds || [];
+  const inputs = inputIds
+    .map((id) => [id, state.data.indices[id]])
+    .filter(([, item]) => item && Number.isFinite(item.latest.value));
+
+  ui.treasuryBreakdown.hidden = inputs.length !== 2;
+  if (inputs.length !== 2) return;
+
+  const dates = inputs.map(([, item]) => item.latest.date).sort();
+  ui.treasuryBreakdownDate.textContent = dates[0] === dates[1]
+    ? `Observed ${formatDate(dates[0], { short: true })}`
+    : "Latest available yield for each maturity";
+  ui.treasuryBreakdownList.replaceChildren();
+
+  for (const [symbol, item] of inputs) {
+    const meta = metaFor(symbol);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `treasury-input${state.symbol === symbol ? " selected" : ""}`;
+    button.dataset.symbol = symbol;
+    button.setAttribute("aria-label", `Open ${meta.name} history`);
+    button.innerHTML = `
+      <span><strong>${meta.ticker}</strong><small>${meta.cardName}</small></span>
+      <strong>${formatIndexValue(item.latest.value, symbol)}</strong>
+      <span>${ordinal(item.percentile.rank)} percentile</span>`;
+    button.addEventListener("click", () => selectIndex(symbol, true));
+    ui.treasuryBreakdownList.append(button);
   }
 }
 
@@ -881,10 +998,14 @@ function renderIndicatorGuide() {
   }
 }
 
+function activeNetworkView() {
+  return state.catalog?.networkViews?.find((view) => view.id === state.networkView);
+}
+
 function visibleNetworkIds() {
-  const configured = liveIndicatorIds().filter((id) =>
-    state.data.indices[id] && state.catalog?.indicators?.[id]?.network?.visible,
-  );
+  const selectedView = activeNetworkView();
+  const viewIds = selectedView?.indicatorIds || [];
+  const configured = viewIds.filter((id) => state.data.indices[id]);
   return configured.length ? configured : pinnedIndicatorIds().filter((id) => state.data.indices[id]);
 }
 
@@ -900,10 +1021,41 @@ function activeRelationshipIds() {
 }
 
 function networkPosition(id, index, count) {
+  const viewPosition = activeNetworkView()?.positions?.[id];
+  if (Number.isFinite(viewPosition?.x) && Number.isFinite(viewPosition?.y)) {
+    return viewPosition;
+  }
   const configured = state.catalog?.indicators?.[id]?.network;
   if (Number.isFinite(configured?.x) && Number.isFinite(configured?.y)) return configured;
   const angle = (Math.PI * 2 * index) / Math.max(1, count) - Math.PI / 2;
   return { x: 50 + Math.cos(angle) * 32, y: 50 + Math.sin(angle) * 32 };
+}
+
+function renderNetworkViewPicker() {
+  if (!ui.networkViewPicker) return;
+  const views = state.catalog?.networkViews || [];
+  if (!views.some((view) => view.id === state.networkView)) state.networkView = views[0]?.id || "overview";
+  ui.networkViewPicker.replaceChildren();
+  for (const view of views) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = view.label;
+    button.dataset.viewId = view.id;
+    button.classList.toggle("active", view.id === state.networkView);
+    button.setAttribute("aria-pressed", view.id === state.networkView ? "true" : "false");
+    button.addEventListener("click", () => {
+      state.networkView = view.id;
+      renderNetwork();
+      requestAnimationFrame(() => {
+        [...ui.networkViewPicker.querySelectorAll("button")]
+          .find((candidate) => candidate.dataset.viewId === view.id)
+          ?.focus({ preventScroll: true });
+      });
+    });
+    ui.networkViewPicker.append(button);
+  }
+  const selected = views.find((view) => view.id === state.networkView);
+  if (ui.networkViewDescription) ui.networkViewDescription.textContent = selected?.description || "";
 }
 
 function drawNetwork() {
@@ -1010,6 +1162,7 @@ function selectNetworkNode(symbol, focusTarget = null) {
 
 function renderNetwork() {
   if (!ui.networkNodeLayer || !state.catalog) return;
+  renderNetworkViewPicker();
   const ids = visibleNetworkIds();
   if (!ids.includes(state.networkSymbol)) state.networkSymbol = ids[0];
   const evidence = new Set(state.activeRegime?.requiredIndicators || []);
@@ -1055,6 +1208,7 @@ function selectIndex(symbol, scrollToDetail = false) {
   state.inspectedIndex = null;
   renderCards();
   renderOfrBreakdown();
+  renderTreasuryBreakdown();
   renderIndexPicker();
   renderDetail();
   if (ui.networkNodeLayer.querySelector(`[data-symbol="${symbol}"]`)) selectNetworkNode(symbol);
@@ -1421,6 +1575,7 @@ function renderDashboard() {
   renderRegime();
   renderCards();
   renderOfrBreakdown();
+  renderTreasuryBreakdown();
   renderIndexPicker();
   renderFamilies();
   renderIndicatorGuide();

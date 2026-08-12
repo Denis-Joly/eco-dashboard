@@ -2,7 +2,7 @@ name: Update public economic data
 
 on:
   schedule:
-    # Runs after the Federal Reserve's 4:15 p.m. Eastern statistical releases.
+    # Runs after the Federal Reserve's 4:15 p.m. and the usual Friday CFTC releases.
     - cron: "30 22 * * 1-5"
   workflow_dispatch:
 

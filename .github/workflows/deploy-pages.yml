@@ -34,7 +34,7 @@ jobs:
       - name: Assemble the static site
         run: |
           mkdir -p _site/data _site/public
-          cp index.html styles.css app.js local-data.mjs .nojekyll _site/
+          cp index.html market-tape.html styles.css app.js local-data.mjs .nojekyll _site/
           cp data/catalog.json data/indices.json _site/data/
           cp public/og.png _site/public/
 

@@ -38,10 +38,18 @@
     "bls": {
       "name": "U.S. Bureau of Labor Statistics",
       "homepage": "https://www.bls.gov/data/",
-      "licensingStatus": "us-federal-government-work-public-domain",
+      "licensingStatus": "us-federal-government-public-domain-credit-requested",
       "publicDisplayAllowed": true,
       "rightsUrl": "https://www.bls.gov/opub/copyright-information.htm",
       "attribution": "U.S. Bureau of Labor Statistics."
+    },
+    "cftc": {
+      "name": "U.S. Commodity Futures Trading Commission",
+      "homepage": "https://www.cftc.gov/MarketReports/CommitmentsofTraders/",
+      "licensingStatus": "us-federal-government-work-public-domain",
+      "publicDisplayAllowed": true,
+      "rightsUrl": "https://www.cftc.gov/WebPolicy/index.htm",
+      "attribution": "U.S. Commodity Futures Trading Commission, Commitments of Traders, Traders in Financial Futures, Futures Only, contract 13874A. Derived calculation by Market Surface."
     },
     "dallas-fed": {
       "name": "Federal Reserve Bank of Dallas",
@@ -60,6 +68,14 @@
       "homepage": "",
       "licensingStatus": "depends-on-input-source-rights",
       "publicDisplayAllowed": null
+    },
+    "tradingview-widget": {
+      "name": "TradingView financial widgets",
+      "homepage": "https://www.tradingview.com/widget/",
+      "licensingStatus": "provider-hosted-display-only-widget",
+      "publicDisplayAllowed": false,
+      "providerHostedDisplayAllowed": true,
+      "rightsUrl": "https://www.tradingview.com/policies/"
     }
   },
   "sections": [
@@ -73,9 +89,9 @@
     },
     {
       "id": "breadth-leadership",
-      "title": "Breadth & leadership",
-      "shortTitle": "Breadth",
-      "description": "Whether market performance is broadly shared or carried by a narrow set of companies and sectors.",
+      "title": "Equities, breadth & leadership",
+      "shortTitle": "Equities",
+      "description": "How equity markets are behaving, and whether performance is broadly shared or carried by a narrow set of companies and sectors.",
       "color": "#77bdfb",
       "order": 20
     },
@@ -89,9 +105,9 @@
     },
     {
       "id": "rates-inflation",
-      "title": "Rates & inflation",
-      "shortTitle": "Rates",
-      "description": "The discount-rate and inflation backdrop that transmits macro changes into asset valuations.",
+      "title": "Rates, bonds & inflation",
+      "shortTitle": "Bonds",
+      "description": "Treasury yields, bond-market instability and the inflation backdrop that transmit macro changes into asset valuations.",
       "color": "#c9a9ff",
       "order": 40
     },
@@ -110,6 +126,73 @@
       "description": "Whether currencies and other markets confirm the regime seen in equities, rates and credit.",
       "color": "#65d6d0",
       "order": 60
+    }
+  ],
+  "networkViews": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "description": "The main cross-market transmission map.",
+      "indicatorIds": ["CPIYOY", "INFLATIONCOMP10Y", "REAL10Y", "RATEVOL20", "OFRFSI", "CURVE2S10S", "EMPDIFF1M", "DTWEXBGS", "LEVSPNET"],
+      "positions": {
+        "CPIYOY": { "x": 8, "y": 40 },
+        "INFLATIONCOMP10Y": { "x": 32, "y": 35 },
+        "REAL10Y": { "x": 56, "y": 35 },
+        "RATEVOL20": { "x": 82, "y": 40 },
+        "OFRFSI": { "x": 58, "y": 82 },
+        "CURVE2S10S": { "x": 8, "y": 72 },
+        "EMPDIFF1M": { "x": 32, "y": 82 },
+        "DTWEXBGS": { "x": 84, "y": 72 },
+        "LEVSPNET": { "x": 82, "y": 10 }
+      }
+    },
+    {
+      "id": "equities",
+      "label": "Equities",
+      "description": "Positioning, macro context and the optional local options layer.",
+      "indicatorIds": ["LEVSPNET", "REAL10Y", "DTWEXBGS", "EMPDIFF1M", "OFRFSI", "VIX", "VIXEQ", "DSPX", "COR1M"],
+      "positions": {
+        "VIXEQ": { "x": 10, "y": 15 },
+        "DSPX": { "x": 35, "y": 15 },
+        "COR1M": { "x": 60, "y": 15 },
+        "VIX": { "x": 85, "y": 15 },
+        "REAL10Y": { "x": 15, "y": 50 },
+        "LEVSPNET": { "x": 40, "y": 50 },
+        "DTWEXBGS": { "x": 65, "y": 50 },
+        "EMPDIFF1M": { "x": 25, "y": 85 },
+        "OFRFSI": { "x": 75, "y": 85 }
+      }
+    },
+    {
+      "id": "bonds",
+      "label": "Bonds",
+      "description": "Yield levels, curve shape, inflation compensation and realized rate volatility.",
+      "indicatorIds": ["DGS2", "DGS10", "CURVE2S10S", "REAL10Y", "INFLATIONCOMP10Y", "RATEVOL20", "CPIYOY", "OFRFSI"],
+      "positions": {
+        "DGS2": { "x": 8, "y": 15 },
+        "DGS10": { "x": 34, "y": 15 },
+        "CURVE2S10S": { "x": 20, "y": 50 },
+        "REAL10Y": { "x": 60, "y": 15 },
+        "INFLATIONCOMP10Y": { "x": 86, "y": 15 },
+        "CPIYOY": { "x": 84, "y": 50 },
+        "RATEVOL20": { "x": 45, "y": 70 },
+        "OFRFSI": { "x": 72, "y": 85 }
+      }
+    },
+    {
+      "id": "volatility",
+      "label": "Volatility",
+      "description": "Public stress measures plus locally supplied implied-volatility internals.",
+      "indicatorIds": ["OFRVOL", "RATEVOL20", "OFRFSI", "VIX", "VIXEQ", "DSPX", "COR1M"],
+      "positions": {
+        "VIXEQ": { "x": 10, "y": 15 },
+        "DSPX": { "x": 35, "y": 15 },
+        "COR1M": { "x": 60, "y": 15 },
+        "VIX": { "x": 85, "y": 15 },
+        "OFRVOL": { "x": 20, "y": 72 },
+        "RATEVOL20": { "x": 50, "y": 72 },
+        "OFRFSI": { "x": 80, "y": 72 }
+      }
     }
   ],
   "indicators": {
@@ -135,7 +218,7 @@
       "unit": { "kind": "volatility-points", "label": "Volatility points", "suffix": "", "decimals": 2, "changeLabel": "pts" },
       "interpretation": { "polarity": "contextual" },
       "historyStatus": { "kind": "mixed", "note": "The modern-method pre-2003 history was reconstructed by Cboe." },
-      "network": { "x": 84, "y": 15, "visible": true }
+      "network": { "x": 84, "y": 10, "visible": true }
     },
     "VIXEQ": {
       "ticker": "VIXEQ",
@@ -159,7 +242,7 @@
       "unit": { "kind": "volatility-points", "label": "Volatility points", "suffix": "", "decimals": 2, "changeLabel": "pts" },
       "interpretation": { "polarity": "contextual" },
       "historyStatus": { "kind": "mixed", "liveSince": "2024-11-04", "preLive": "back-tested" },
-      "network": { "x": 12, "y": 15, "visible": true }
+      "network": { "x": 12, "y": 10, "visible": true }
     },
     "DSPX": {
       "ticker": "DSPX",
@@ -183,7 +266,7 @@
       "unit": { "kind": "dispersion-points", "label": "Dispersion points", "suffix": "", "decimals": 2, "changeLabel": "pts" },
       "interpretation": { "polarity": "contextual" },
       "historyStatus": { "kind": "mixed", "liveSince": "2023-09-27", "preLive": "back-tested" },
-      "network": { "x": 36, "y": 15, "visible": true }
+      "network": { "x": 36, "y": 10, "visible": true }
     },
     "COR1M": {
       "ticker": "COR1M",
@@ -207,7 +290,7 @@
       "unit": { "kind": "percent", "label": "Implied correlation %", "suffix": "%", "decimals": 2, "changeLabel": "pts" },
       "interpretation": { "polarity": "contextual" },
       "historyStatus": { "kind": "mixed", "disseminatedSince": "2022-03-18", "preLive": "historical" },
-      "network": { "x": 60, "y": 15, "visible": true }
+      "network": { "x": 60, "y": 10, "visible": true }
     },
     "VIX9D": {
       "ticker": "VIX9D",
@@ -346,6 +429,32 @@
       "sourceRef": "computed",
       "sourceUrl": ""
     },
+    "LEVSPNET": {
+      "ticker": "LEV S&P NET",
+      "name": "Leveraged funds net E-mini S&P 500 positioning",
+      "shortName": "Leveraged equity positioning",
+      "sectionId": "breadth-leadership",
+      "status": "live",
+      "pinned": true,
+      "displayOrder": 25,
+      "role": "Equity futures positioning",
+      "description": "Leveraged funds' directional long positions minus short positions in E-mini S&P 500 futures, divided by total open interest.",
+      "howToRead": "Positive values indicate net long positioning and negative values indicate net short positioning relative to open interest. Hedge funds and other leveraged managers may use futures for hedging, arbitrage and basis trades, so this is a crowding signal rather than a standalone market forecast. CFTC warns that the pre-publication backcast becomes less accurate farther back because it applies later trader classifications retrospectively.",
+      "whyAdd": "Adds a genuinely public equity-market positioning signal without republishing a proprietary stock-index price.",
+      "frequency": "weekly",
+      "publicationLagDays": 3,
+      "calendar": "weekly-cftc-report-date",
+      "timezone": "America/New_York",
+      "observationSemantics": "Dashboard calculation from the CFTC Traders in Financial Futures Futures Only report for contract 13874A: 100 × (leveraged-fund long positions minus short positions) divided by total open interest. Positions are normally dated Tuesday, with holiday adjustments.",
+      "observationLabel": "weekly reports",
+      "staleAfterDays": 14,
+      "sourceRef": "cftc",
+      "sourceUrl": "https://publicreportinghub.cftc.gov/Commitments-of-Traders/TFF-Futures-Only/gpe5-46if",
+      "calculation": { "formula": "100 × (leveraged long - leveraged short) / total open interest", "inputs": ["CFTC TFF contract 13874A"], "calculatedBy": "Economic Dashboard", "historyNote": "Pre-publication history was backcast by CFTC using later trader classifications; CFTC says its accuracy diminishes farther back." },
+      "unit": { "kind": "percent-open-interest", "label": "Percent of open interest", "suffix": "%", "decimals": 1, "changeLabel": "pp" },
+      "interpretation": { "polarity": "contextual" },
+      "network": { "x": 82, "y": 15, "visible": true }
+    },
     "OFREQUITY": {
       "ticker": "OFR EQUITY",
       "name": "OFR Financial Stress Index: Equity valuation contribution",
@@ -395,7 +504,7 @@
       "unit": { "kind": "index-points", "label": "Index points", "suffix": "", "decimals": 2, "changeLabel": "pts" },
       "interpretation": { "polarity": "high-is-stress" },
       "componentIds": ["OFRVOL", "OFREQUITY", "OFRCREDIT", "OFRFUNDING", "OFRSAFE"],
-      "network": { "x": 68, "y": 51, "visible": true }
+      "network": { "x": 58, "y": 82, "visible": true }
     },
     "OFRCREDIT": {
       "ticker": "OFR CREDIT",
@@ -494,19 +603,23 @@
       "sourceRef": "federal-reserve",
       "sourceUrl": "https://www.federalreserve.gov/releases/h15/",
       "calculation": { "formula": "100 × (DGS10 - DGS2)", "inputs": ["DGS10", "DGS2"], "calculatedBy": "Economic Dashboard" },
+      "componentIds": ["DGS2", "DGS10"],
       "unit": { "kind": "basis-points", "label": "Basis points", "suffix": " bp", "decimals": 0, "changeLabel": "bp" },
       "interpretation": { "polarity": "contextual" },
-      "network": { "x": 28, "y": 85, "visible": true }
+      "network": { "x": 8, "y": 72, "visible": true }
     },
     "DGS2": {
       "ticker": "DGS2",
       "name": "2-Year Treasury Constant Maturity Rate",
       "shortName": "Two-year Treasury yield",
       "sectionId": "rates-inflation",
-      "status": "planned",
-      "wave": 1,
+      "status": "live",
+      "pinned": false,
+      "parentIndicatorId": "CURVE2S10S",
+      "presentation": { "guide": false, "picker": false, "family": false },
       "displayOrder": 12,
       "description": "Daily market yield on U.S. Treasury securities at two-year constant maturity.",
+      "howToRead": "The 2-year yield is especially sensitive to the expected path of monetary policy. A higher level generally means tighter expected short-term rates, but it should be read with inflation and growth data.",
       "whyAdd": "Provides the policy-sensitive short-rate input for the yield-curve slope.",
       "frequency": "daily",
       "calendar": "us-business-days",
@@ -515,20 +628,23 @@
       "observationLabel": "daily observations",
       "staleAfterDays": 7,
       "sourceRef": "federal-reserve",
-      "sourceUrl": "https://fred.stlouisfed.org/series/DGS2",
-      "deliveryStatus": "planned-direct-board-or-terms-compliant-route-required",
+      "sourceUrl": "https://www.federalreserve.gov/releases/h15/",
       "unit": { "kind": "percent", "label": "Percent", "suffix": "%", "decimals": 2, "changeLabel": "pp" },
-      "interpretation": { "polarity": "contextual" }
+      "interpretation": { "polarity": "contextual" },
+      "network": { "visible": false }
     },
     "DGS10": {
       "ticker": "DGS10",
       "name": "10-Year Treasury Constant Maturity Rate",
       "shortName": "Ten-year Treasury yield",
       "sectionId": "rates-inflation",
-      "status": "planned",
-      "wave": 1,
+      "status": "live",
+      "pinned": false,
+      "parentIndicatorId": "CURVE2S10S",
+      "presentation": { "guide": false, "picker": false, "family": false },
       "displayOrder": 14,
       "description": "Daily market yield on U.S. Treasury securities at ten-year constant maturity.",
+      "howToRead": "The 10-year yield combines expected future short rates, inflation compensation and term risk. Higher values increase the nominal discount rate, but the economic message depends on which component is moving.",
       "whyAdd": "Provides the long-rate input for curve and rate-volatility context.",
       "frequency": "daily",
       "calendar": "us-business-days",
@@ -537,20 +653,22 @@
       "observationLabel": "daily observations",
       "staleAfterDays": 7,
       "sourceRef": "federal-reserve",
-      "sourceUrl": "https://fred.stlouisfed.org/series/DGS10",
-      "deliveryStatus": "planned-direct-board-or-terms-compliant-route-required",
+      "sourceUrl": "https://www.federalreserve.gov/releases/h15/",
       "unit": { "kind": "percent", "label": "Percent", "suffix": "%", "decimals": 2, "changeLabel": "pp" },
-      "interpretation": { "polarity": "contextual" }
+      "interpretation": { "polarity": "contextual" },
+      "network": { "visible": false }
     },
     "RATEVOL20": {
       "ticker": "RATE VOL 20",
       "name": "20-Observation Realized 10-Year Treasury Yield Volatility",
       "shortName": "Rate volatility",
       "sectionId": "rates-inflation",
-      "status": "planned",
-      "wave": 1,
+      "status": "live",
+      "pinned": true,
       "displayOrder": 16,
+      "role": "Realized bond-market instability",
       "description": "Dashboard-calculated sample volatility of the latest 20 valid daily changes in DGS10.",
+      "howToRead": "Higher values mean the 10-year Treasury yield has been changing more sharply from day to day. This is backward-looking realized rate volatility, not option-implied volatility and not a substitute for the MOVE Index.",
       "whyAdd": "Shows whether the rates backdrop is unusually unstable even when the yield level itself is not extreme.",
       "frequency": "daily",
       "calendar": "us-business-days",
@@ -558,12 +676,12 @@
       "observationSemantics": "Dashboard calculation: sample standard deviation of the latest 20 DGS10 changes in basis points",
       "observationLabel": "daily calculations",
       "staleAfterDays": 7,
-      "sourceRef": "dashboard-calculation",
-      "sourceUrl": "https://fred.stlouisfed.org/series/DGS10",
-      "deliveryStatus": "planned-terms-compliant-input-route-required",
+      "sourceRef": "federal-reserve",
+      "sourceUrl": "https://www.federalreserve.gov/releases/h15/",
       "calculation": { "formula": "sample standard deviation of latest 20 changes in 100 × DGS10", "inputs": ["DGS10"], "windowObservations": 20, "calculatedBy": "Economic Dashboard" },
       "unit": { "kind": "basis-points-per-day", "label": "Basis points per day", "suffix": " bp/day", "decimals": 1, "changeLabel": "bp/day" },
-      "interpretation": { "polarity": "high-is-stress" }
+      "interpretation": { "polarity": "high-is-stress" },
+      "network": { "x": 82, "y": 40, "visible": true }
     },
     "REAL10Y": {
       "ticker": "10Y REAL",
@@ -587,7 +705,7 @@
       "sourceUrl": "https://www.federalreserve.gov/releases/h15/",
       "unit": { "kind": "percent", "label": "Percent", "suffix": "%", "decimals": 2, "changeLabel": "pp" },
       "interpretation": { "polarity": "contextual" },
-      "network": { "x": 36, "y": 51, "visible": true }
+      "network": { "x": 56, "y": 35, "visible": true }
     },
     "CPIYOY": {
       "ticker": "CPI YOY",
@@ -612,19 +730,32 @@
       "calculation": { "formula": "100 × (CPI[t] / CPI[t-12] - 1)", "inputs": ["CUUR0000SA0"], "calculatedBy": "Economic Dashboard" },
       "unit": { "kind": "percent", "label": "Percent year over year", "suffix": "%", "decimals": 2, "changeLabel": "pp" },
       "interpretation": { "polarity": "high-is-inflation" },
-      "network": { "x": 12, "y": 51, "visible": true }
+      "network": { "x": 8, "y": 40, "visible": true }
     },
-    "T10YIE": {
-      "ticker": "10Y BE",
-      "name": "10-Year Breakeven Inflation Rate",
-      "shortName": "Inflation expectations",
+    "INFLATIONCOMP10Y": {
+      "ticker": "10Y INFL COMP",
+      "name": "10-Year nominal-real yield gap",
+      "shortName": "Ten-year inflation compensation",
       "sectionId": "rates-inflation",
-      "status": "planned",
-      "wave": 2,
+      "status": "live",
+      "pinned": true,
       "displayOrder": 30,
-      "whyAdd": "Separates changes in nominal yields into real-rate and inflation-expectation components.",
-      "sourceRef": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/series/T10YIE"
+      "role": "Bond-market inflation compensation",
+      "description": "Same-date difference between the Federal Reserve's nominal and inflation-indexed 10-year Treasury constant-maturity yields.",
+      "howToRead": "A higher gap means investors require more nominal yield relative to the real yield. It contains expected inflation as well as inflation-risk and liquidity premia, so it should not be read as a pure inflation forecast.",
+      "whyAdd": "Separates nominal Treasury yields into real-rate and inflation-compensation context using public Board data.",
+      "frequency": "daily",
+      "calendar": "us-business-days",
+      "timezone": "America/New_York",
+      "observationSemantics": "Dashboard calculation from Federal Reserve H.15: nominal 10-year yield minus real 10-year yield on same-date observations",
+      "observationLabel": "daily calculations",
+      "staleAfterDays": 7,
+      "sourceRef": "federal-reserve",
+      "sourceUrl": "https://www.federalreserve.gov/releases/h15/",
+      "calculation": { "formula": "DGS10 - REAL10Y", "inputs": ["DGS10", "REAL10Y"], "calculatedBy": "Economic Dashboard" },
+      "unit": { "kind": "percent", "label": "Percentage points", "suffix": "%", "decimals": 2, "changeLabel": "pp" },
+      "interpretation": { "polarity": "contextual" },
+      "network": { "x": 32, "y": 35, "visible": true }
     },
     "T5YIFR": {
       "ticker": "5Y5Y INF",
@@ -681,7 +812,7 @@
       "sourceUrl": "https://data.bls.gov/timeseries/CES0500000021",
       "unit": { "kind": "diffusion-index", "label": "Diffusion index, 50 neutral", "suffix": "", "decimals": 1, "changeLabel": "pts" },
       "interpretation": { "polarity": "high-is-growth" },
-      "network": { "x": 58, "y": 85, "visible": true }
+      "network": { "x": 32, "y": 82, "visible": true }
     },
     "WEI": {
       "ticker": "WEI",
@@ -728,7 +859,7 @@
       "sourceUrl": "https://www.federalreserve.gov/releases/h10/summary/",
       "unit": { "kind": "index-points", "label": "Index points", "suffix": "", "decimals": 2, "changeLabel": "pts" },
       "interpretation": { "polarity": "contextual" },
-      "network": { "x": 90, "y": 51, "visible": true }
+      "network": { "x": 84, "y": 72, "visible": true }
     },
     "OFRSAFE": {
       "ticker": "OFR SAFE",
@@ -820,6 +951,42 @@
       "direction": "confirms",
       "label": "Uncertainty about volatility",
       "explanation": "High VVIX can show fragile or rapidly changing volatility expectations even before VIX reaches an extreme."
+    },
+    {
+      "id": "leveraged-positioning-to-fsi",
+      "source": "LEVSPNET",
+      "target": "OFRFSI",
+      "type": "cross-market",
+      "direction": "qualifies",
+      "label": "Positioning qualifies broad stress",
+      "explanation": "Historically stretched leveraged-fund positioning can amplify a shock, but the OFR aggregate is needed to test whether wider financial stress is actually present."
+    },
+    {
+      "id": "real-yield-to-leveraged-positioning",
+      "source": "REAL10Y",
+      "target": "LEVSPNET",
+      "type": "macro-context",
+      "direction": "qualifies",
+      "label": "Real rates provide positioning context",
+      "explanation": "A restrictive real discount rate can help explain defensive or short equity positioning, although the relationship is not mechanical."
+    },
+    {
+      "id": "dollar-to-leveraged-positioning",
+      "source": "DTWEXBGS",
+      "target": "LEVSPNET",
+      "type": "cross-market",
+      "direction": "qualifies",
+      "label": "The dollar tests global risk pressure",
+      "explanation": "A strong dollar alongside relatively short leveraged equity positioning is more consistent with cross-market tightening than positioning alone."
+    },
+    {
+      "id": "leveraged-positioning-to-vix",
+      "source": "LEVSPNET",
+      "target": "VIX",
+      "type": "cross-market",
+      "direction": "compares",
+      "label": "Positioning versus implied equity risk",
+      "explanation": "When a local VIX history is active, the pair shows whether options pricing and leveraged futures positioning are telling a coherent equity-risk story."
     },
     {
       "id": "breadth-to-dispersion",
@@ -975,6 +1142,78 @@
       "explanation": "Reading realized inflation with the real yield helps distinguish inflation pressure from changes in the inflation-adjusted discount rate."
     },
     {
+      "id": "two-year-to-curve",
+      "source": "DGS2",
+      "target": "CURVE2S10S",
+      "type": "methodological",
+      "direction": "contributes",
+      "label": "The 2-year yield is the short-rate input",
+      "explanation": "The dashboard subtracts the same-date 2-year Treasury yield from the 10-year yield to calculate the curve slope."
+    },
+    {
+      "id": "ten-year-to-curve",
+      "source": "DGS10",
+      "target": "CURVE2S10S",
+      "type": "methodological",
+      "direction": "contributes",
+      "label": "The 10-year yield is the long-rate input",
+      "explanation": "The dashboard uses the same-date 10-year Treasury yield as the long end of the calculated curve slope."
+    },
+    {
+      "id": "ten-year-to-rate-volatility",
+      "source": "DGS10",
+      "target": "RATEVOL20",
+      "type": "methodological",
+      "direction": "contributes",
+      "label": "Daily 10-year moves generate realized rate volatility",
+      "explanation": "RATE VOL 20 is the sample volatility of the latest 20 valid daily changes in the 10-year Treasury yield."
+    },
+    {
+      "id": "ten-year-to-inflation-compensation",
+      "source": "DGS10",
+      "target": "INFLATIONCOMP10Y",
+      "type": "methodological",
+      "direction": "contributes",
+      "label": "The nominal 10-year yield is the first input",
+      "explanation": "The dashboard subtracts the same-date real 10-year yield from this nominal 10-year yield to calculate the inflation-compensation gap."
+    },
+    {
+      "id": "real-yield-to-inflation-compensation",
+      "source": "REAL10Y",
+      "target": "INFLATIONCOMP10Y",
+      "type": "methodological",
+      "direction": "compares",
+      "label": "Nominal yield versus real yield",
+      "explanation": "Subtracting the same-date real 10-year yield from the nominal yield produces the dashboard's inflation-compensation gap."
+    },
+    {
+      "id": "inflation-compensation-to-cpi",
+      "source": "INFLATIONCOMP10Y",
+      "target": "CPIYOY",
+      "type": "macro-context",
+      "direction": "compares",
+      "label": "Market compensation versus realized inflation",
+      "explanation": "The nominal-real yield gap adds forward-looking bond-market context to realized CPI inflation, but it also contains risk and liquidity premia."
+    },
+    {
+      "id": "rate-volatility-to-fsi",
+      "source": "RATEVOL20",
+      "target": "OFRFSI",
+      "type": "cross-market",
+      "direction": "confirms",
+      "label": "Rate instability tests broader financial stress",
+      "explanation": "High realized Treasury-yield volatility alongside elevated OFR stress is stronger evidence of a cross-market disturbance than either reading alone."
+    },
+    {
+      "id": "rate-volatility-to-vix",
+      "source": "RATEVOL20",
+      "target": "VIX",
+      "type": "cross-market",
+      "direction": "compares",
+      "label": "Rates volatility versus equity implied volatility",
+      "explanation": "When a local VIX history is active, comparing it with realized Treasury-yield volatility helps distinguish an equity-specific shock from wider market instability."
+    },
+    {
       "id": "broad-dollar-to-fsi",
       "source": "DTWEXBGS",
       "target": "OFRFSI",
@@ -1054,6 +1293,20 @@
       "conditions": [
         { "indicatorId": "VIX", "metric": "percentile", "operator": "gt", "value": 75 },
         { "indicatorId": "COR1M", "metric": "percentile", "operator": "gt", "value": 75 }
+      ]
+    },
+    {
+      "id": "rates-instability-with-stress",
+      "priority": 78,
+      "minObservations": 252,
+      "alignment": { "policy": "max-gap", "maxGapDays": 7 },
+      "title": "Treasury instability is confirming broader stress",
+      "copy": "Realized 10-year Treasury yield volatility and the OFR Financial Stress Index are both in the upper quarter of their histories. Rate instability is therefore appearing alongside wider financial stress rather than as an isolated bond-market move.",
+      "requiredIndicators": ["RATEVOL20", "OFRFSI"],
+      "evidenceRelationships": ["rate-volatility-to-fsi"],
+      "conditions": [
+        { "indicatorId": "RATEVOL20", "metric": "percentile", "operator": "gt", "value": 75 },
+        { "indicatorId": "OFRFSI", "metric": "percentile", "operator": "gt", "value": 75 }
       ]
     },
     {

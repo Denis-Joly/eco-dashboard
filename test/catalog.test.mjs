@@ -35,7 +35,24 @@ test("every current indicator has complete guide copy", async () => {
       ["live", "local"].includes(indicator.status) && indicator.presentation?.guide !== false,
     );
 
-  assert.equal(currentIndicators.length, 10, "the guide should cover six public headlines and four optional local indicators");
+  assert.deepEqual(
+    currentIndicators.map(([id]) => id).sort(),
+    [
+      "COR1M",
+      "CPIYOY",
+      "CURVE2S10S",
+      "DSPX",
+      "DTWEXBGS",
+      "EMPDIFF1M",
+      "INFLATIONCOMP10Y",
+      "LEVSPNET",
+      "OFRFSI",
+      "RATEVOL20",
+      "REAL10Y",
+      "VIX",
+      "VIXEQ",
+    ],
+  );
   for (const [id, indicator] of currentIndicators) {
     assert.match(indicator.description || "", /\S/, `${id} needs a plain-language definition`);
     assert.match(indicator.howToRead || "", /\S/, `${id} needs interpretation guidance`);
@@ -72,9 +89,24 @@ test("OFR components form one complete hidden breakdown under the aggregate", as
   }
 });
 
-test("Federal Reserve and BLS sources have explicit public reuse metadata", async () => {
+test("Treasury curve inputs form a hidden two-yield breakdown", async () => {
   const catalog = await readJson("data/catalog.json");
-  for (const sourceId of ["federal-reserve", "bls"]) {
+  const inputIds = ["DGS2", "DGS10"];
+  assert.deepEqual(catalog.indicators.CURVE2S10S.componentIds, inputIds);
+  for (const id of inputIds) {
+    const input = catalog.indicators[id];
+    assert.equal(input.status, "live");
+    assert.equal(input.parentIndicatorId, "CURVE2S10S");
+    assert.equal(input.pinned, false);
+    assert.equal(input.presentation?.guide, false);
+    assert.equal(input.presentation?.picker, false);
+    assert.equal(input.sourceRef, "federal-reserve");
+  }
+});
+
+test("hosted public sources have explicit public reuse metadata", async () => {
+  const catalog = await readJson("data/catalog.json");
+  for (const sourceId of ["ofr", "federal-reserve", "bls", "cftc"]) {
     const source = catalog.sources[sourceId];
     assert.equal(source.publicDisplayAllowed, true, `${sourceId} should be approved for public display`);
     assert.match(source.rightsUrl || "", /^https:\/\//, `${sourceId} needs an official rights page`);
@@ -118,39 +150,26 @@ test("catalog relationships and regimes reference known indicators", async () =>
   assert.equal(catalog.regimes.filter((regime) => regime.conditions.length === 0).length, 1, "catalog needs exactly one fallback regime");
 });
 
-test("headline interaction network is positioned, connected and explicit", async () => {
+test("every published calculation input is represented by a methodological edge", async () => {
   const catalog = await readJson("data/catalog.json");
-  const expectedNodes = [
-    "OFRFSI",
-    "CURVE2S10S",
-    "REAL10Y",
-    "CPIYOY",
-    "EMPDIFF1M",
-    "DTWEXBGS",
-    "VIX",
-    "VIXEQ",
-    "DSPX",
-    "COR1M",
-  ];
-  const visibleNodes = Object.entries(catalog.indicators)
-    .filter(([, indicator]) => ["live", "local"].includes(indicator.status) && indicator.network?.visible)
-    .map(([id]) => id)
-    .sort();
-  assert.deepEqual(visibleNodes, [...expectedNodes].sort());
-
-  for (const id of expectedNodes) {
-    const { x, y } = catalog.indicators[id].network;
-    assert.ok(Number.isFinite(x) && x >= 0 && x <= 100, `${id} needs a valid network x position`);
-    assert.ok(Number.isFinite(y) && y >= 0 && y <= 100, `${id} needs a valid network y position`);
-  }
-  for (let left = 0; left < expectedNodes.length; left += 1) {
-    for (let right = left + 1; right < expectedNodes.length; right += 1) {
-      const leftPosition = catalog.indicators[expectedNodes[left]].network;
-      const rightPosition = catalog.indicators[expectedNodes[right]].network;
-      const distance = Math.hypot(leftPosition.x - rightPosition.x, leftPosition.y - rightPosition.y);
-      assert.ok(distance >= 18, `${expectedNodes[left]} and ${expectedNodes[right]} overlap in the network`);
+  const calculatedIds = ["CURVE2S10S", "RATEVOL20", "INFLATIONCOMP10Y"];
+  for (const target of calculatedIds) {
+    for (const source of catalog.indicators[target].calculation.inputs) {
+      assert.ok(
+        catalog.relationships.some((relationship) =>
+          relationship.type === "methodological" &&
+          relationship.source === source &&
+          relationship.target === target,
+        ),
+        `${source} needs a methodological edge to ${target}`,
+      );
     }
   }
+});
+
+test("each interaction-network view is positioned, connected and explicit", async () => {
+  const catalog = await readJson("data/catalog.json");
+  assert.deepEqual(catalog.networkViews.map(({ id }) => id), ["overview", "equities", "bonds", "volatility"]);
 
   const explicitRelationshipIds = [
     "yield-curve-to-employment-breadth",
@@ -163,24 +182,45 @@ test("headline interaction network is positioned, connected and explicit", async
   const relationshipIds = new Set(catalog.relationships.map(({ id }) => id));
   for (const id of explicitRelationshipIds) assert.ok(relationshipIds.has(id), `${id} is missing`);
 
-  const visibleSet = new Set(expectedNodes);
-  const neighbors = Object.fromEntries(expectedNodes.map((id) => [id, new Set()]));
-  for (const relationship of catalog.relationships) {
-    if (!visibleSet.has(relationship.source) || !visibleSet.has(relationship.target)) continue;
-    neighbors[relationship.source].add(relationship.target);
-    neighbors[relationship.target].add(relationship.source);
-  }
-  const reached = new Set([expectedNodes[0]]);
-  const queue = [expectedNodes[0]];
-  while (queue.length) {
-    const current = queue.shift();
-    for (const neighbor of neighbors[current]) {
-      if (reached.has(neighbor)) continue;
-      reached.add(neighbor);
-      queue.push(neighbor);
+  for (const view of catalog.networkViews) {
+    assert.ok(view.indicatorIds.length >= 6 && view.indicatorIds.length <= 10, `${view.id} should remain readable`);
+    assert.equal(new Set(view.indicatorIds).size, view.indicatorIds.length, `${view.id} repeats an indicator`);
+    for (const id of view.indicatorIds) {
+      assert.ok(["live", "local"].includes(catalog.indicators[id]?.status), `${view.id} contains unavailable ${id}`);
+      const { x, y } = view.positions?.[id] || {};
+      assert.ok(Number.isFinite(x) && x >= 0 && x <= 100, `${view.id}:${id} needs a valid x position`);
+      assert.ok(Number.isFinite(y) && y >= 0 && y <= 100, `${view.id}:${id} needs a valid y position`);
     }
+    for (let left = 0; left < view.indicatorIds.length; left += 1) {
+      for (let right = left + 1; right < view.indicatorIds.length; right += 1) {
+        const leftId = view.indicatorIds[left];
+        const rightId = view.indicatorIds[right];
+        const leftPosition = view.positions[leftId];
+        const rightPosition = view.positions[rightId];
+        const distance = Math.hypot(leftPosition.x - rightPosition.x, leftPosition.y - rightPosition.y);
+        assert.ok(distance >= 18, `${view.id}:${leftId} and ${rightId} overlap`);
+      }
+    }
+
+    const visibleSet = new Set(view.indicatorIds);
+    const neighbors = Object.fromEntries(view.indicatorIds.map((id) => [id, new Set()]));
+    for (const relationship of catalog.relationships) {
+      if (!visibleSet.has(relationship.source) || !visibleSet.has(relationship.target)) continue;
+      neighbors[relationship.source].add(relationship.target);
+      neighbors[relationship.target].add(relationship.source);
+    }
+    const reached = new Set([view.indicatorIds[0]]);
+    const queue = [view.indicatorIds[0]];
+    while (queue.length) {
+      const current = queue.shift();
+      for (const neighbor of neighbors[current]) {
+        if (reached.has(neighbor)) continue;
+        reached.add(neighbor);
+        queue.push(neighbor);
+      }
+    }
+    assert.equal(reached.size, view.indicatorIds.length, `${view.id} should form one connected graph`);
   }
-  assert.equal(reached.size, expectedNodes.length, "all headline and local nodes should belong to one connected graph");
 });
 
 test("combined public regimes use conservative thresholds and monthly-safe alignment", async () => {
@@ -190,11 +230,16 @@ test("combined public regimes use conservative thresholds and monthly-safe align
     "curve-and-employment-warning",
     "inflation-and-real-rate-pressure",
     "contained-stress-with-positive-breadth",
+    "rates-instability-with-stress",
   ];
   for (const id of regimeIds) {
     const regime = catalog.regimes.find((candidate) => candidate.id === id);
     assert.ok(regime, `${id} is missing`);
-    const expectedGap = id === "inflation-and-real-rate-pressure" ? 75 : 45;
+    const expectedGap = id === "inflation-and-real-rate-pressure"
+      ? 75
+      : id === "rates-instability-with-stress"
+        ? 7
+        : 45;
     assert.deepEqual(regime.alignment, { policy: "max-gap", maxGapDays: expectedGap });
     assert.ok(regime.conditions.length >= 2, `${id} should require confirmation from multiple indicators`);
     for (const indicatorId of regime.requiredIndicators) {
@@ -252,14 +297,19 @@ test("every live catalog indicator has valid generated data", async () => {
   const expectedLiveIds = [
     "CPIYOY",
     "CURVE2S10S",
+    "DGS10",
+    "DGS2",
     "DTWEXBGS",
     "EMPDIFF1M",
+    "INFLATIONCOMP10Y",
+    "LEVSPNET",
     "OFRCREDIT",
     "OFREQUITY",
     "OFRFSI",
     "OFRFUNDING",
     "OFRSAFE",
     "OFRVOL",
+    "RATEVOL20",
     "REAL10Y",
   ];
 
@@ -283,7 +333,7 @@ test("every live catalog indicator has valid generated data", async () => {
   );
   assert.deepEqual(Object.keys(data.indices).sort(), expectedLiveIds);
   assert.equal(data.rights?.publicDisplayAllowed, true);
-  for (const sourceId of ["ofr", "federal-reserve", "bls"]) {
+  for (const sourceId of ["ofr", "federal-reserve", "bls", "cftc"]) {
     assert.ok(data.sources?.[sourceId], `${sourceId} should be listed in the generated source manifest`);
     assert.equal(data.rights?.sources?.[sourceId]?.publicDisplayAllowed, true, `${sourceId} needs generated public-display approval`);
     assert.match(data.rights?.sources?.[sourceId]?.rightsUrl || "", /^https:\/\//, `${sourceId} needs generated rights metadata`);
@@ -323,17 +373,41 @@ test("only promoted direct-source and derived indicators enter the hosted payloa
     readJson("data/catalog.json"),
     readJson("data/indices.json"),
   ]);
-  for (const id of ["CURVE2S10S", "REAL10Y", "DTWEXBGS", "EMPDIFF1M", "CPIYOY"]) {
+  for (const id of [
+    "DGS2",
+    "DGS10",
+    "CURVE2S10S",
+    "REAL10Y",
+    "RATEVOL20",
+    "INFLATIONCOMP10Y",
+    "DTWEXBGS",
+    "EMPDIFF1M",
+    "CPIYOY",
+    "LEVSPNET",
+  ]) {
     assert.equal(catalog.indicators[id]?.status, "live", `${id} should be live`);
     assert.ok(data.indices[id], `${id} should be in the hosted payload`);
-  }
-  for (const id of ["DGS2", "DGS10", "RATEVOL20"]) {
-    assert.equal(catalog.indicators[id]?.status, "planned", `${id} should remain planned`);
-    assert.equal(data.indices[id], undefined, `${id} must not be in the hosted payload`);
   }
 });
 
 test("publication gate approves only the resolved hosted sources", async () => {
   const catalog = await readJson("data/catalog.json");
   assert.deepEqual(publicationBlockers(catalog), []);
+});
+
+test("provider market display is sandboxed and excluded from analytics", async () => {
+  const [html, widget, app, workflow] = await Promise.all([
+    readFile(new URL("index.html", projectUrl), "utf8"),
+    readFile(new URL("market-tape.html", projectUrl), "utf8"),
+    readFile(new URL("app.js", projectUrl), "utf8"),
+    readFile(new URL(".github/workflows/deploy-pages.yml", projectUrl), "utf8"),
+  ]);
+  assert.match(html, /src="market-tape\.html\?v=[^"]+"/);
+  assert.match(html, /sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"/);
+  assert.doesNotMatch(html, /allow-same-origin/);
+  for (const symbol of ["CME_MINI:ES1!", "CME_MINI:NQ1!", "CBOT:ZN1!", "CBOE:VX1!"]) {
+    assert.match(widget, new RegExp(symbol.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  }
+  assert.doesNotMatch(app, /tradingview|query1\.finance\.yahoo|yahoo\.com/i);
+  assert.match(workflow, /cp index\.html market-tape\.html styles\.css app\.js/);
 });

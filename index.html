@@ -30,8 +30,8 @@
     />
     <meta name="twitter:image" content="https://denis-joly.github.io/eco-dashboard/public/og.png" />
     <title>Market Surface: Economic &amp; Market Regime Dashboard</title>
-    <link rel="stylesheet" href="styles.css?v=20260811b" />
-    <script type="module" src="app.js?v=20260811b"></script>
+    <link rel="stylesheet" href="styles.css?v=20260812b" />
+    <script type="module" src="app.js?v=20260812b"></script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to dashboard</a>
@@ -53,8 +53,8 @@
           <p class="eyebrow">Public macro data · Private market overlay</p>
           <h1 id="hero-title">Is the market calm, or are the signals <em>telling different stories?</em></h1>
           <p class="hero-intro">
-            A growing dashboard that connects public stress, rates, inflation, labour and dollar data with an optional private market-data
-            layer, so the regime can be read as a system rather than as isolated indicators.
+            A growing dashboard that connects public equity positioning, stress, bonds, inflation, labour and dollar data with an optional
+            private options layer, so the regime can be read as a system rather than as isolated indicators.
           </p>
           <a class="text-link" href="#relationships">See how the signals connect <span aria-hidden="true">↓</span></a>
         </div>
@@ -79,7 +79,7 @@
             <p class="eyebrow">Your private options layer</p>
             <h2 id="private-layer-title">Add Cboe market analysis without publishing the data</h2>
             <p>
-              The hosted dashboard uses public OFR, Federal Reserve and BLS observations. If you have obtained VIX, VIXEQ, DSPX or COR1M
+              The hosted dashboard uses public OFR, Federal Reserve, BLS and CFTC observations. If you have obtained VIX, VIXEQ, DSPX or COR1M
               CSV files for your own permitted use, you can open them locally to add their histories, percentiles
               and relationships to this session.
             </p>
@@ -130,6 +130,52 @@
         </div>
       </section>
 
+      <section class="market-display section-shell" id="market-display" aria-labelledby="market-display-title">
+        <div class="section-heading market-display-heading">
+          <div>
+            <p class="eyebrow">Display-only market context</p>
+            <h2 id="market-display-title">Equity, Treasury and volatility futures</h2>
+          </div>
+          <p class="section-note">
+            Provider-hosted prices give immediate market context. They remain separate from the dashboard's
+            public dataset, percentiles and regime engine.
+          </p>
+        </div>
+        <div class="market-display-grid">
+          <article class="market-widget-panel panel" aria-labelledby="market-widget-title">
+            <div class="market-widget-topline">
+              <div>
+                <p class="panel-label">Provider-hosted display</p>
+                <h3 id="market-widget-title">Switch between four liquid futures markets</h3>
+              </div>
+              <span>Delayed where required</span>
+            </div>
+            <iframe
+              class="market-widget-frame"
+              title="TradingView display for S&P 500, Nasdaq 100, 10-year Treasury note and VIX futures"
+              src="market-tape.html?v=20260812b"
+              loading="lazy"
+              sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
+              referrerpolicy="strict-origin-when-cross-origin"
+            ></iframe>
+          </article>
+          <aside class="market-display-explainer panel" aria-labelledby="market-display-explainer-title">
+            <p class="panel-label">What this layer can and cannot do</p>
+            <h3 id="market-display-explainer-title">Useful for context, isolated from analysis</h3>
+            <ul>
+              <li><strong>Equities:</strong> S&P 500 and Nasdaq 100 futures provide broad index direction.</li>
+              <li><strong>Bonds:</strong> 10-year Treasury note futures provide a market-price view alongside our public yield analytics.</li>
+              <li><strong>Volatility:</strong> a continuous front VIX futures series reflects pricing for a future VIX level. It is not the spot VIX Index.</li>
+            </ul>
+            <p>
+              Loading this sandboxed panel connects to TradingView. Its values are not read, stored or processed by
+              Market Surface, and the widget cannot access locally opened CSV files.
+            </p>
+            <a href="https://www.tradingview.com/widget/" target="_blank" rel="noopener noreferrer">About TradingView widgets ↗</a>
+          </aside>
+        </div>
+      </section>
+
       <section class="snapshot section-shell" aria-labelledby="snapshot-title">
         <div class="section-heading">
           <div>
@@ -156,6 +202,17 @@
           </div>
           <div class="ofr-breakdown-list" id="ofr-breakdown-list"></div>
         </article>
+        <article class="treasury-breakdown panel" id="treasury-breakdown" aria-labelledby="treasury-breakdown-title" hidden>
+          <div class="treasury-breakdown-heading">
+            <div>
+              <p class="panel-label">Inside the yield curve</p>
+              <h3 id="treasury-breakdown-title">The two Treasury yields behind the slope</h3>
+              <p>The 2-year yield is policy-sensitive; the 10-year yield reflects longer-run rates, inflation compensation and term risk.</p>
+            </div>
+            <span id="treasury-breakdown-date"></span>
+          </div>
+          <div class="treasury-breakdown-list" id="treasury-breakdown-list"></div>
+        </article>
       </section>
 
       <section class="indicator-guide section-shell" id="indicator-guide" aria-labelledby="indicator-guide-title">
@@ -171,7 +228,8 @@
         </div>
         <p class="indicator-guide-note">
           OFR category readings are shown as a complete five-part decomposition of the aggregate index. They are
-          supporting detail, not five independent headline indicators.
+          supporting detail, not five independent headline indicators. The 2-year and 10-year yields are similarly
+          grouped as the two inputs behind the yield-curve slope.
         </p>
         <div class="indicator-guide-groups" id="indicator-guide-groups"></div>
       </section>
@@ -198,6 +256,10 @@
                 <span><i class="legend-line solid"></i> Methodological</span>
                 <span><i class="legend-line dotted"></i> Component, contextual or regime</span>
               </div>
+            </div>
+            <div class="network-view-row">
+              <div class="segmented-control network-view-picker" id="network-view-picker" role="group" aria-label="Choose a relationship network"></div>
+              <p id="network-view-description">The main cross-market transmission map.</p>
             </div>
             <div class="network-stage" id="network-stage">
               <canvas id="network-canvas" aria-hidden="true"></canvas>
@@ -339,7 +401,7 @@
             <span class="concept-number">02</span>
             <p class="concept-ticker">BREADTH &amp; CREDIT</p>
             <h3>How widely is the story spreading?</h3>
-            <p>Breadth tests participation. Credit and funding conditions test whether stress has escaped the equity-options complex.</p>
+            <p>Positioning and breadth test participation and crowding. Credit and funding test whether stress has escaped the equity-options complex.</p>
           </article>
           <div class="flow-operator" aria-hidden="true">↔</div>
           <article class="concept-card accent-card">
@@ -372,8 +434,9 @@
           <p class="source-credit">
             Sources: <a href="https://www.financialresearch.gov/financial-stress-index/" target="_blank" rel="noopener noreferrer">Office of Financial Research</a>,
             <a href="https://www.federalreserve.gov/releases/h15/" target="_blank" rel="noopener noreferrer">Federal Reserve H.15</a>,
-            <a href="https://www.federalreserve.gov/releases/h10/" target="_blank" rel="noopener noreferrer">Federal Reserve H.10</a>, and
-            <a href="https://www.bls.gov/" target="_blank" rel="noopener noreferrer">U.S. Bureau of Labor Statistics</a>.
+            <a href="https://www.federalreserve.gov/releases/h10/" target="_blank" rel="noopener noreferrer">Federal Reserve H.10</a>,
+            <a href="https://www.bls.gov/" target="_blank" rel="noopener noreferrer">U.S. Bureau of Labor Statistics</a>, and
+            <a href="https://www.cftc.gov/MarketReports/CommitmentsofTraders/" target="_blank" rel="noopener noreferrer">U.S. Commodity Futures Trading Commission</a>.
             Each reading keeps its own observation date and release cadence.
             <span id="source-retrieval-date"></span>
             BLS.gov cannot vouch for the data or analyses derived from these data after the data have been retrieved from BLS.gov.
@@ -418,6 +481,13 @@
             </p>
           </details>
           <details>
+            <summary>Why are the futures prices excluded from percentiles?</summary>
+            <p>
+              They are rendered by a provider-hosted TradingView widget in a sandboxed frame. Market Surface cannot read or store those
+              values, so they provide visual context only and never enter the dashboard's calculations or regime rules.
+            </p>
+          </details>
+          <details>
             <summary>What are the interpretation limits?</summary>
             <p>
               The regime summary is deterministic educational commentary based on relative historical ranks. It is
@@ -437,6 +507,7 @@
         <a href="https://www.financialresearch.gov/financial-stress-index/" target="_blank" rel="noopener noreferrer">OFR Financial Stress Index</a>
         <a href="https://www.federalreserve.gov/data.htm" target="_blank" rel="noopener noreferrer">Federal Reserve data</a>
         <a href="https://www.bls.gov/" target="_blank" rel="noopener noreferrer">BLS data</a>
+        <a href="https://www.cftc.gov/MarketReports/CommitmentsofTraders/" target="_blank" rel="noopener noreferrer">CFTC positioning</a>
         <a href="https://www.cboe.com/us/indices/" target="_blank" rel="noopener noreferrer">Cboe index information</a>
       </div>
       <p class="disclaimer">Educational information only · No investment advice</p>

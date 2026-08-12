@@ -526,6 +526,112 @@ input {
   list-style: none;
 }
 
+.market-display {
+  padding-top: 72px;
+  padding-bottom: 80px;
+}
+
+.market-display-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(300px, 0.75fr);
+  gap: 14px;
+}
+
+.market-widget-panel,
+.market-display-explainer {
+  min-height: 0;
+  padding: 24px;
+}
+
+.market-widget-panel {
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 95% 0, rgba(101, 214, 208, 0.08), transparent 22rem),
+    var(--surface);
+}
+
+.market-widget-topline {
+  display: flex;
+  min-height: 48px;
+  margin-bottom: 17px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.market-widget-topline h3,
+.market-display-explainer h3 {
+  margin: 5px 0 0;
+  font-family: var(--display);
+  font-size: clamp(1.45rem, 2.4vw, 2rem);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
+.market-widget-topline > span {
+  flex: 0 0 auto;
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink-faint);
+  font-size: 0.63rem;
+  font-weight: 760;
+}
+
+.market-widget-frame {
+  display: block;
+  width: 100%;
+  height: 410px;
+  border: 0;
+  border-radius: 13px;
+  background: #0b211d;
+}
+
+.market-display-explainer {
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(circle at 100% 0, rgba(201, 169, 255, 0.08), transparent 18rem),
+    var(--surface);
+}
+
+.market-display-explainer ul {
+  display: grid;
+  padding: 0;
+  margin: 28px 0 0;
+  gap: 13px;
+  list-style: none;
+}
+
+.market-display-explainer li {
+  padding: 13px 0 0;
+  border-top: 1px solid var(--line);
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+}
+
+.market-display-explainer li strong {
+  color: var(--ink);
+}
+
+.market-display-explainer > p:not(.panel-label) {
+  margin: auto 0 0;
+  padding-top: 24px;
+  color: var(--ink-faint);
+  font-size: 0.7rem;
+}
+
+.market-display-explainer > a {
+  width: fit-content;
+  min-height: 38px;
+  margin-top: 17px;
+  color: var(--mint);
+  font-size: 0.72rem;
+  font-weight: 740;
+  text-underline-offset: 4px;
+}
+
 .local-data-summary li {
   padding: 6px 9px;
   border-radius: 999px;
@@ -798,6 +904,50 @@ input {
 
 .metric-grid {
   display: grid;
+  align-items: start;
+  gap: 30px;
+}
+
+.metric-family-group {
+  display: grid;
+  gap: 13px;
+}
+
+.metric-family-heading {
+  display: flex;
+  max-width: 780px;
+  align-items: flex-start;
+  gap: 11px;
+}
+
+.metric-family-heading h3 {
+  margin: 0 0 3px;
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 1.12rem;
+  font-weight: 560;
+  letter-spacing: -0.02em;
+}
+
+.metric-family-heading p {
+  margin: 0;
+  color: var(--ink-faint);
+  font-size: 0.68rem;
+  line-height: 1.55;
+}
+
+.metric-family-dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--family-color);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--family-color), transparent 40%);
+}
+
+.metric-family-cards {
+  display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   align-items: start;
   gap: 14px;
@@ -844,6 +994,87 @@ input {
   display: grid;
   margin-top: 22px;
   gap: 8px;
+}
+
+.treasury-breakdown {
+  min-height: auto;
+  margin-top: 14px;
+  padding: 24px;
+}
+
+.treasury-breakdown-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.treasury-breakdown-heading h3 {
+  margin: 5px 0 7px;
+  font-family: var(--display);
+  font-size: 1.55rem;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.treasury-breakdown-heading p,
+.treasury-breakdown-heading > span {
+  margin: 0;
+  color: var(--ink-faint);
+  font-size: 0.7rem;
+}
+
+.treasury-breakdown-heading > div > p:last-child {
+  max-width: 680px;
+}
+
+.treasury-breakdown-list {
+  display: grid;
+  margin-top: 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.treasury-input {
+  display: grid;
+  min-height: 72px;
+  padding: 12px 14px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 5px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.012);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.treasury-input:hover,
+.treasury-input.selected {
+  border-color: rgba(201, 169, 255, 0.42);
+  background: rgba(201, 169, 255, 0.05);
+}
+
+.treasury-input > span:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.treasury-input > span:first-child strong {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+}
+
+.treasury-input small,
+.treasury-input > span:last-child {
+  color: var(--ink-faint);
+  font-size: 0.65rem;
+}
+
+.treasury-input > span:last-child {
+  grid-column: 1 / -1;
 }
 
 .ofr-contribution {
@@ -963,6 +1194,27 @@ input {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+
+.network-view-row {
+  display: flex;
+  margin-top: 20px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.network-view-picker {
+  flex: 0 1 auto;
+}
+
+.network-view-row p {
+  max-width: 410px;
+  margin: 0;
+  color: var(--ink-faint);
+  font-size: 0.66rem;
+  line-height: 1.5;
+  text-align: right;
 }
 
 .legend-line {
@@ -2015,10 +2267,18 @@ input {
   }
 
   .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-family-cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .data-access-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .market-display-grid {
     grid-template-columns: 1fr;
   }
 
@@ -2137,13 +2397,27 @@ input {
     padding: 18px;
   }
 
-  .ofr-breakdown-heading {
+  .ofr-breakdown-heading,
+  .treasury-breakdown-heading,
+  .network-view-row {
     flex-direction: column;
     gap: 10px;
   }
 
   .ofr-breakdown-heading > span {
     padding-top: 0;
+  }
+
+  .treasury-breakdown-list {
+    grid-template-columns: 1fr;
+  }
+
+  .network-view-row {
+    align-items: flex-start;
+  }
+
+  .network-view-row p {
+    text-align: left;
   }
 
   .ofr-contribution {
@@ -2293,8 +2567,30 @@ input {
     grid-template-columns: 1fr;
   }
 
+  .metric-family-cards {
+    grid-template-columns: 1fr;
+  }
+
   .local-data-panel {
     padding: 22px;
+  }
+
+  .market-widget-panel,
+  .market-display-explainer {
+    padding: 18px;
+  }
+
+  .market-widget-topline {
+    display: grid;
+    gap: 10px;
+  }
+
+  .market-widget-topline > span {
+    width: fit-content;
+  }
+
+  .market-widget-frame {
+    height: 470px;
   }
 
   .local-data-actions,
