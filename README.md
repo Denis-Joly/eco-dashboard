@@ -7,10 +7,6 @@ Market Surface is a static, expandable dashboard for reading financial and econo
 
 The public site has two deliberately separate data layers.
 
-## Built with Codex
-
-Market Surface was designed and coded by Denis Joly with assistance from Codex, OpenAI's coding agent. Codex helped with the software architecture, data pipeline, automated tests, interface implementation and deployment review. The project maintainer remains responsible for the product decisions and published content.
-
 ## Public layer
 
 The hosted dataset combines official, openly reusable government outputs from four public institutions:
@@ -164,3 +160,7 @@ test/catalog.test.mjs                  Catalog and publication-boundary tests
 ```
 
 Educational information only. No investment advice.
+
+## Development
+
+Market Surface was designed and coded by Denis Joly with assistance from Codex, OpenAI's coding agent. Codex helped with the software architecture, data pipeline, automated tests, interface implementation and deployment review. The project maintainer remains responsible for the product decisions and published content.
